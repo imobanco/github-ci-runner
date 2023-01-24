@@ -24,7 +24,7 @@ jobs:
 
       - name: Instala podman
         run: |
-          sudo apt install podman
+          sudo apt-get install -y podman
 
       - name: Run alpine
         run: |
