@@ -36,13 +36,6 @@ jobs:
           && nix flake --version
           echo "$HOME"/.nix-profile/bin >> $GITHUB_PATH
 
-      - name: Remove podman via apt-get
-        run: |
-          sudo apt-get purge -y podman containers-image containers-common
-          sudo apt-get autoremove --purge
-          sudo apt-get -y clean
-          podman --version || echo podman not installed
-
       - name: Instala podman usando nix
         run: |
           nix profile install github:ES-Nix/podman-rootless/83ff27be5616e3029c2aec2de595f86da081e857#podman
