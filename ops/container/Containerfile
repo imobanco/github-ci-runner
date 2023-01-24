@@ -19,20 +19,38 @@ RUN apt-get update \
 ARG GH_RUNNER_VERSION="2.301.1"
 ARG TARGET_PLATFORM="x64"
 
-WORKDIR /actions-runner
 
-COPY ./ops/bash/install_runner.sh /actions-runner
+WORKDIR /home/runner_user
 
-RUN mkdir /_work
+RUN addgroup runner_group \
+ && adduser \
+    --quiet \
+    --disabled-password \
+    --shell /bin/bash \
+    --home /home/runner_user \
+    --gecos "User" runner_user \
+    --ingroup runner_group \
+ && chmod 0700 /home/runner_user \
+ && chown --recursive runner_user:runner_group /home/runner_user \
+ && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-RUN chmod +x /actions-runner/install_runner.sh
-
-RUN /actions-runner/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
-  && rm /actions-runner/install_runner.sh
-
-COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /
-RUN chmod +x /runner_token.sh /entrypoint.sh
+# USER runner_user
 
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+RUN mkdir /home/runner_user/_work && mkdir /home/runner_user/runner-cli
+
+COPY ./ops/bash/install_runner.sh /home/runner_user
+
+RUN ls -la /home/runner_user/
+
+RUN chmod +x /home/runner_user/install_runner.sh
+
+RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
+  && rm /home/runner_user/install_runner.sh
+
+COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /home/runner_user
+RUN chmod +x /home/runner_user/runner_token.sh /home/runner_user/entrypoint.sh
+
+
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["./runner-cli/bin/Runner.Listener", "run", "--startuptype", "service"]

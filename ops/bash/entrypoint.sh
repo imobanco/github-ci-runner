@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 
 export RUNNER_ALLOW_RUNASROOT=1
-export PATH=${PATH}:/actions-runner
+export PATH=${PATH}:/home/runner_user/runner-cli
 
 # Un-export these, so that they must be passed explicitly to the environment of
 # any command that needs them.  This may help prevent leaks.
@@ -12,7 +12,7 @@ export -n RUNNER_TOKEN
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET}))
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
@@ -20,7 +20,7 @@ deregister_runner() {
 }
 
 _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
-_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work-${_RUNNER_NAME}}
+_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/home/runner_user/_work-${_RUNNER_NAME}}
 _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
@@ -52,7 +52,7 @@ configure_runner() {
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET})
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET})
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
 
@@ -91,10 +91,10 @@ if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   # directory exists, copy the data
   if [[ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
     echo "Copying previous data"
-    cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
+    cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/home/runner_user/runner-cli"
   fi
 
-  if [ -f "/actions-runner/.runner" ]; then
+  if [ -f "/home/runner_user/runner-cli/.runner" ]; then
     echo "The runner has already been configured"
   else
     configure_runner
@@ -107,7 +107,7 @@ fi
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Reusage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
   # Quoting (even with double-quotes) the regexp brokes the copying
-  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -p -r "/home/runner_user/runner-cli/_diag" "/home/runner_user/runner-cli/svc.sh" /home/runner_user/runner-cli/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 
@@ -124,9 +124,8 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
 else
   if [[ $(id -u) -eq 0 ]]; then
     [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    /usr/bin/chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
+    /usr/bin/chown -R runner "${_RUNNER_WORKDIR}" /home/runner_user/runner-cli
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
-    /usr/bin/chown runner /opt/hostedtoolcache/
     /usr/sbin/gosu runner "$@"
   else
     "$@"
