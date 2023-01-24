@@ -36,37 +36,28 @@ RUN addgroup runner_group \
 
 RUN mkdir /nix && chown runner_user:runner_group /nix
 
-# ENV HOME=/home/runner_user
-# RUN BASE_URL='https://raw.githubusercontent.com/ES-Nix/get-nix/' \
-# 	&& SHA256=5443257f9e3ac31c5f0da60332d7c5bebfab1cdf \
-# 	&& NIX_RELEASE_VERSION='2.10.2' \
-# 	&& curl -fsSL "${BASE_URL}""$SHA256"/get-nix.sh | sh -s -- ${NIX_RELEASE_VERSION} \
-# 	&& . "$HOME"/.nix-profile/etc/profile.d/nix.sh \
-# 	&& . ~/."$(ps -ocomm= -q $$)"rc \
-# 	&& export TMPDIR=/tmp \
-# 	&& nix flake --version
-# 	echo "$HOME"/.nix-profile/bin >> $GITHUB_PATH
-
 RUN mkdir /home/runner_user/_work && mkdir /home/runner_user/runner-cli
 
-COPY ./ops/bash/install_runner.sh /home/runner_user
-
-RUN chmod +x /home/runner_user/install_runner.sh
-
-COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /home/runner_user
-RUN chmod +x /home/runner_user/runner_token.sh /home/runner_user/entrypoint.sh
+COPY ./ops/bash/install_runner.sh ./ops/bash/install_nix.sh ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /home/runner_user
+RUN chmod +x /home/runner_user/install_runner.sh /home/runner_user/runner_token.sh /home/runner_user/entrypoint.sh /home/runner_user/install_nix.sh
 
 RUN ls -la /home/runner_user/
 RUN ls -la /home/runner_user/runner-cli
+#
+# RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
+#   && rm /home/runner_user/install_runner.sh
 
-RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
-  && rm /home/runner_user/install_runner.sh
+
 
 RUN chown --recursive runner_user:runner_group /home/runner_user
 USER runner_user
 
 RUN ls -la /home/runner_user/
 RUN ls -la /home/runner_user/runner-cli
+
+# ENV HOME=/home/runner_user
+# RUN /home/runner_user/install_nix.sh \
+#   && rm /home/runner_user/install_nix.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["./runner-cli/bin/Runner.Listener", "run", "--startuptype", "service"]
