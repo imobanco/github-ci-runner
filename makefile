@@ -24,15 +24,35 @@ build:
 	podman build --file $(CONTAINERFILE) --tag $(IMAGE) --label org.opencontainers.image.created=$(DATE) --label org.opencontainers.image.revision=$(GIT_REVISION) $(args) .
 
 run.repo:
-	podman run -d --rm \
+	podman run --privileged -d --rm \
 	 -e RUNNER_SCOPE="repo" \
 	 -e SCOPE_TARGET="https://github.com/imobanco/github-ci-runner" \
 	 -e ACCESS_TOKEN="${ACCESS_TOKEN}" \
 	 ghcr.io/imobanco/github-ci-runner:latest
 
 run.org:
-	podman run -d --rm \
+	podman run --privileged -d --rm \
 	 -e RUNNER_SCOPE="org" \
 	 -e SCOPE_TARGET="imobanco" \
 	 -e ACCESS_TOKEN="${ACCESS_TOKEN}" \
 	 ghcr.io/imobanco/github-ci-runner:latest
+
+login.registry:
+	podman login $(IMAGE_REGISTRY)
+
+login.registry.stdin:
+	@echo $(PASSWORD)  | podman login --username $(USERNAME) --password-stdin $(IMAGE_REGISTRY)
+
+logout.registry:
+	podman logout $(IMAGE_REGISTRY)
+
+pull: login.registry
+	podman pull $(IMAGE)
+
+push.to.registry:
+	podman push $(IMAGE)
+
+build.and.push:
+	make build
+	make login.registry.stdin
+	make push.to.registry

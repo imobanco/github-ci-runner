@@ -11,7 +11,8 @@ RUN apt-get update \
     libicu70 \
     curl \
     jq \
-    ca-certificates
+    ca-certificates \
+    sudo
 
 
 ARG GH_RUNNER_VERSION="2.301.1"
