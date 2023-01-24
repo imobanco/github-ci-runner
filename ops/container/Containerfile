@@ -1,0 +1,35 @@
+FROM ubuntu:jammy
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    liblttng-ust1 \
+    libkrb5-3 \
+    zlib1g \
+    libssl3 \
+    libicu70 \
+    curl \
+    jq \
+    ca-certificates
+
+
+ARG GH_RUNNER_VERSION="2.301.1"
+ARG TARGET_PLATFORM="x64"
+
+WORKDIR /actions-runner
+
+COPY ./ops/bash/install_runner.sh /actions-runner
+COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /
+
+RUN mkdir /_work
+
+RUN chmod +x /runner_token.sh /entrypoint.sh \
+  && chmod +x /actions-runner/install_runner.sh
+
+RUN /actions-runner/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
+  && rm /actions-runner/install_runner.sh
+
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
