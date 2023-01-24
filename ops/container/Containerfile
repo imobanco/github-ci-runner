@@ -41,8 +41,6 @@ RUN mkdir /home/runner_user/_work && mkdir /home/runner_user/runner-cli
 
 COPY ./ops/bash/install_runner.sh /home/runner_user
 
-RUN ls -la /home/runner_user/
-
 RUN chmod +x /home/runner_user/install_runner.sh
 
 RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
@@ -51,6 +49,8 @@ RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} 
 COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /home/runner_user
 RUN chmod +x /home/runner_user/runner_token.sh /home/runner_user/entrypoint.sh
 
+RUN ls -la /home/runner_user/
+RUN ls -la /home/runner_user/runner-cli
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["./runner-cli/bin/Runner.Listener", "run", "--startuptype", "service"]
