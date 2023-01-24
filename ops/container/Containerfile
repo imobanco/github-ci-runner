@@ -41,18 +41,11 @@ RUN mkdir /home/runner_user/_work && mkdir /home/runner_user/runner-cli
 COPY ./ops/bash/install_runner.sh ./ops/bash/install_nix.sh ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /home/runner_user
 RUN chmod +x /home/runner_user/install_runner.sh /home/runner_user/runner_token.sh /home/runner_user/entrypoint.sh /home/runner_user/install_nix.sh
 
-RUN ls -la /home/runner_user/
-RUN ls -la /home/runner_user/runner-cli
-
 RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
   && rm /home/runner_user/install_runner.sh
 
-
 RUN chown --recursive runner_user:runner_group /home/runner_user
 USER runner_user
-
-RUN ls -la /home/runner_user/
-RUN ls -la /home/runner_user/runner-cli
 
 # ENV HOME=/home/runner_user
 # RUN /home/runner_user/install_nix.sh \
