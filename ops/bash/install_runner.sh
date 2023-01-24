@@ -11,8 +11,8 @@ if [[ $TARGET_PLATFORM == "linux/arm64" ]]; then
   export TARGET_ARCH="arm64"
 fi
 
-curl -L "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-${TARGET_PLATFORM}-${GH_RUNNER_VERSION}.tar.gz" > actions.tar.gz
-tar -zxf actions.tar.gz
-rm -f actions.tar.gz
+curl -L "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-${TARGET_PLATFORM}-${GH_RUNNER_VERSION}.tar.gz" > runner-cli/actions.tar.gz
+tar -zxf runner-cli/actions.tar.gz
+rm -f runner-cli/actions.tar.gz
 
-./bin/installdependencies.sh
+./runner-cli/bin/installdependencies.sh
