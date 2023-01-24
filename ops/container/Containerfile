@@ -20,15 +20,16 @@ ARG TARGET_PLATFORM="x64"
 WORKDIR /actions-runner
 
 COPY ./ops/bash/install_runner.sh /actions-runner
-COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /
 
 RUN mkdir /_work
 
-RUN chmod +x /runner_token.sh /entrypoint.sh \
-  && chmod +x /actions-runner/install_runner.sh
+RUN chmod +x /actions-runner/install_runner.sh
 
 RUN /actions-runner/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
   && rm /actions-runner/install_runner.sh
+
+COPY ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /
+RUN chmod +x /runner_token.sh /entrypoint.sh
 
 
 ENTRYPOINT ["/entrypoint.sh"]

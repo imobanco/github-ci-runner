@@ -27,17 +27,13 @@ https://github.com/myoung34/docker-github-actions-runner/wiki/Usage#token-scope
 ## Enterprise
 ```bash
 source .env
-RUNNER_SCOPE=ent
-SCOPE_TARGET=imobanco
-./ops/bash/runner_token.sh
+./ops/bash/runner_token.sh ent imobanco
 ```
 
 ## Organization
 ```bash
 source .env
-RUNNER_SCOPE=org
-SCOPE_TARGET=imobanco
-./ops/bash/runner_token.sh
+./ops/bash/runner_token.sh org imobanco
 ```
 
 ## Repo
