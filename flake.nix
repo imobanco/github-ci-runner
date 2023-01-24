@@ -92,7 +92,6 @@
             patchelf
             podman-rootless.packages.${system}.podman
             jq
-            httpie
           ];
 
           shellHook = ''
