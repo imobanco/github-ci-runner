@@ -12,7 +12,8 @@ RUN apt-get update \
     curl \
     jq \
     ca-certificates \
-    sudo
+    sudo \
+    xz-utils
 
 
 ARG GH_RUNNER_VERSION="2.301.1"
