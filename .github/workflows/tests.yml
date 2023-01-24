@@ -22,24 +22,9 @@ jobs:
       - name: Rodar um echo
         run: echo 'teste'
 
-      - name: Instala nix single user
+      - name: Instala podman
         run: |
-          test -d /nix || sudo mkdir -m 0755 /nix \
-          && sudo -k chown "$USER": /nix \
-          && BASE_URL='https://raw.githubusercontent.com/ES-Nix/get-nix/' \
-          && SHA256=5443257f9e3ac31c5f0da60332d7c5bebfab1cdf \
-          && NIX_RELEASE_VERSION='2.10.2' \
-          && curl -fsSL "${BASE_URL}""$SHA256"/get-nix.sh | sh -s -- ${NIX_RELEASE_VERSION} \
-          && . "$HOME"/.nix-profile/etc/profile.d/nix.sh \
-          && . ~/."$(ps -ocomm= -q $$)"rc \
-          && export TMPDIR=/tmp \
-          && nix flake --version
-          echo "$HOME"/.nix-profile/bin >> $GITHUB_PATH
-
-      - name: Instala podman usando nix
-        run: |
-          nix profile install github:ES-Nix/podman-rootless/83ff27be5616e3029c2aec2de595f86da081e857#podman
-          podman --version
+          sudo apt install podman
 
       - name: Run alpine
         run: |
