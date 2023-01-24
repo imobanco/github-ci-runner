@@ -3,8 +3,8 @@ name: Faz push da imagem
 on:
   push:
     branches:
-      - master
-      - "*"
+      - "main"
+      - "feature/CI"
 
 jobs:
   push:
