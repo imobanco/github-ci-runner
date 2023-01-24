@@ -1,0 +1,24 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branchs:
+      - 'feature/**'
+      - 'fix/**'
+      - 'refactor/**'
+
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    needs: lint
+    name: Testes
+    steps:
+      - name: checkout PR merge commit
+        uses: actions/checkout@v3
+
+      - name: Rodar um echo
+        run: echo 'teste'
