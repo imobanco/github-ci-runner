@@ -19,7 +19,7 @@ curl -L "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSIO
 
 ls -la
 ls -la ./runner-cli
-tar -zxf /home/runner_user/runner-cli/actions.tar.gz
+tar -zxf /home/runner_user/runner-cli/actions.tar.gz -C /home/runner_user/runner-cli
 
 ls -la
 ls -la ./runner-cli
