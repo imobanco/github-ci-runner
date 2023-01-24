@@ -1,0 +1,108 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1667395993,
+        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "flake-utils_2": {
+      "locked": {
+        "lastModified": 1667395993,
+        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1674361931,
+        "narHash": "sha256-lUIZItHbW+LmJAz9V9puLq2rHlewcUgg1RPehkQIkzc=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ef479383e13698c8d5ccf8a608485dc8ce1d4f80",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1671548329,
+        "narHash": "sha256-OrC6R6zihRjFqdKFF3/vD3bkz44poONSII8ncre1Wh0=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ba6ba2b90096dc49f448aa4d4d783b5081b1cc87",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_release_20_03": {
+      "locked": {
+        "lastModified": 1651477990,
+        "narHash": "sha256-nnY12IKDdVnnybAe44nPTTspS0KwA5SDNBo1z8K5/MU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "345ff18c99af958afdbd57f077aae9af4000e864",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "release-20.03",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "podman-rootless": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1671737304,
+        "narHash": "sha256-BdxYdQvZu+B8+UdsPdnPnkTOCmSqZNvFoNbbJOhty6Y=",
+        "owner": "ES-Nix",
+        "repo": "podman-rootless",
+        "rev": "83ff27be5616e3029c2aec2de595f86da081e857",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ES-Nix",
+        "ref": "from-nixpkgs",
+        "repo": "podman-rootless",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "nixpkgs_release_20_03": "nixpkgs_release_20_03",
+        "podman-rootless": "podman-rootless"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

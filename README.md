@@ -43,7 +43,5 @@ SCOPE_TARGET=imobanco
 ## Repo
 ```bash
 source .env
-RUNNER_SCOPE=repo
-SCOPE_TARGET=https://github.com/imobanco/github-ci-runner
-./ops/bash/runner_token.sh
+./ops/bash/runner_token.sh repo https://github.com/imobanco/github-ci-runner
 ```
