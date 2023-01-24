@@ -43,10 +43,9 @@ RUN chmod +x /home/runner_user/install_runner.sh /home/runner_user/runner_token.
 
 RUN ls -la /home/runner_user/
 RUN ls -la /home/runner_user/runner-cli
-#
-# RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
-#   && rm /home/runner_user/install_runner.sh
 
+RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
+  && rm /home/runner_user/install_runner.sh
 
 
 RUN chown --recursive runner_user:runner_group /home/runner_user
