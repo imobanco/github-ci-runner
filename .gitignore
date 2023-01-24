@@ -2,3 +2,4 @@
 .idea/
 actions-runner-linux-x64-2.301.1/
 .env
+run/
