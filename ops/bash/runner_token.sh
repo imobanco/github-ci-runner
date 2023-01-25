@@ -46,6 +46,26 @@ case ${RUNNER_SCOPE} in
     ;;
 esac
 
+#https post ${_FULL_URL} \
+#  Authorization:"token $ACCESS_TOKEN" \
+#  Accept:"application/vnd.github.${API_VERSION}+json" \
+#  Content-Length:"0" \
+#  --check-status \
+#  --timeout=2.5 \
+#  --print 'b' 1> /tmp/http_runner_token 2> /tmp/http_runner_token_error
+#statuscode_var=$(echo ${?})
+#stdout_var=$( cat /tmp/http_runner_token )
+#stderr_var=$( cat /tmp/http_runner_token_error )
+#
+#if [ $statuscode_var != 0 ]
+#then
+#  echo "Failed to get runner token!" >&2
+#  echo $stderr_var >&2
+#  echo $stdout_var >&2
+#  exit $statuscode_var
+#fi
+#
+#RUNNER_TOKEN="$(echo $stdout_var | jq -r '.token')"
 
 RUNNER_TOKEN="$(curl -XPOST -fsSL \
   -H "${CONTENT_LENGTH_HEADER}" \
