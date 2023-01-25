@@ -93,6 +93,7 @@
             podman-rootless.packages.${system}.podman
             jq
             httpie
+#            catatonit
           ];
 
           shellHook = ''

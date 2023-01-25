@@ -50,3 +50,8 @@ USER runner_user
 
 ENTRYPOINT ["/home/runner_user/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+
+#
+# ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+# CMD ["bash", "-c", "/home/runner_user/entrypoint.sh && exec ./bin/Runner.Listener run --startuptype service"]
+# CMD ["/home/runner_user/entrypoint.sh", "./bin/Runner.Listener", "run", "--startuptype", "service"]
