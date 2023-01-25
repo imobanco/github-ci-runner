@@ -9,11 +9,29 @@ export PATH=${PATH}:/home/runner_user/runner-cli
 export -n ACCESS_TOKEN
 export -n RUNNER_TOKEN
 
+
+get_runner_token() {
+  ACCESS_TOKEN="${ACCESS_TOKEN}" bash ./ops/bash/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET}  1> /tmp/runner_token 2> /tmp/runner_token_error
+  statuscode_var=$(echo ${?})
+  stdout_var=$( cat /tmp/runner_token )
+  stderr_var=$( cat /tmp/runner_token_error )
+  if [ $statuscode_var != 0 ]
+  then
+    echo "runner_token.sh has failed!"
+    echo $stdout_var
+    echo $stderr_var
+    exit 1
+  fi
+  echo "${stdout_var}" | jq -r .token
+  return 0
+}
+
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET})
-    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+    echo "Obtaining the token of the runner"
+    RUNNER_TOKEN=$(get_runner_token)
+    echo "got token $RUNNER_TOKEN"
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
   exit
@@ -52,8 +70,9 @@ configure_runner() {
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET})
-    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+    RUNNER_TOKEN=$(get_runner_token)
+    echo "got token $RUNNER_TOKEN"
+    exit 1
   fi
 
   # shellcheck disable=SC2153
