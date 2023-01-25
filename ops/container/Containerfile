@@ -12,7 +12,8 @@ RUN apt-get update \
     ca-certificates \
     sudo \
     xz-utils \
-    httpie
+    httpie \
+    dumb-init
 
 RUN addgroup runner_group \
 	&& adduser \
@@ -48,10 +49,8 @@ USER runner_user
 # RUN /home/runner_user/install_nix.sh \
 #   && rm /home/runner_user/install_nix.sh
 
-ENTRYPOINT ["/home/runner_user/entrypoint.sh"]
-CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+# ENTRYPOINT ["/home/runner_user/entrypoint.sh"]
+# CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
 
-#
-# ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-# CMD ["bash", "-c", "/home/runner_user/entrypoint.sh && exec ./bin/Runner.Listener run --startuptype service"]
-# CMD ["/home/runner_user/entrypoint.sh", "./bin/Runner.Listener", "run", "--startuptype", "service"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/home/runner_user/entrypoint.sh", "./bin/Runner.Listener", "run", "--startuptype", "service"]
