@@ -11,7 +11,7 @@ export -n RUNNER_TOKEN
 
 
 get_runner_token() {
-  ACCESS_TOKEN="${ACCESS_TOKEN}" bash ./ops/bash/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET}  1> /tmp/runner_token 2> /tmp/runner_token_error
+  ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET}  1> /tmp/runner_token 2> /tmp/runner_token_error
   statuscode_var=$(echo ${?})
   stdout_var=$( cat /tmp/runner_token )
   stderr_var=$( cat /tmp/runner_token_error )
@@ -72,7 +72,6 @@ configure_runner() {
     echo "Obtaining the token of the runner"
     RUNNER_TOKEN=$(get_runner_token)
     echo "got token $RUNNER_TOKEN"
-    exit 1
   fi
 
   # shellcheck disable=SC2153
