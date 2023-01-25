@@ -1,0 +1,31 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branchs:
+      - 'feature/**'
+      - 'fix/**'
+      - 'refactor/**'
+
+
+jobs:
+  test:
+    runs-on: self-hosted
+    name: Testes
+    steps:
+      - name: checkout PR merge commit
+        uses: actions/checkout@v3
+
+      - name: Rodar um echo
+        run: echo 'teste'
+
+      - name: Instala podman
+        run: |
+          sudo apt-get install -y podman
+
+      - name: Run alpine
+        run: |
+          podman run alpine 

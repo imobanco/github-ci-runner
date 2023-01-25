@@ -1,0 +1,56 @@
+FROM ubuntu:jammy
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    liblttng-ust1 \
+    libkrb5-3 \
+    zlib1g \
+    libssl3 \
+    libicu70 \
+    curl \
+    jq \
+    ca-certificates \
+    sudo \
+    xz-utils \
+    httpie \
+    dumb-init
+
+RUN addgroup runner_group \
+	&& adduser \
+		--quiet \
+		--disabled-password \
+		--shell /bin/bash \
+		--home /home/runner_user \
+		--gecos "User" runner_user \
+		--ingroup runner_group \
+	&& chmod 0700 /home/runner_user \
+	&& echo "runner_user ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/runner_user
+
+RUN mkdir /home/runner_user/_work && mkdir /home/runner_user/runner-cli
+WORKDIR /home/runner_user/runner-cli
+ARG GH_RUNNER_VERSION="2.301.1"
+ARG TARGET_PLATFORM="x64"
+
+COPY ./ops/bash/install_runner.sh /home/runner_user
+RUN chmod +x /home/runner_user/install_runner.sh
+
+RUN /home/runner_user/install_runner.sh ${GH_RUNNER_VERSION} ${TARGET_PLATFORM} \
+  && rm /home/runner_user/install_runner.sh
+
+RUN mkdir /nix && chown runner_user:runner_group /nix
+
+COPY ./ops/bash/install_nix.sh ./ops/bash/runner_token.sh ./ops/bash/entrypoint.sh /home/runner_user
+RUN chmod +x /home/runner_user/runner_token.sh /home/runner_user/entrypoint.sh /home/runner_user/install_nix.sh
+
+RUN chown --recursive runner_user:runner_group /home/runner_user
+USER runner_user
+
+# ENV HOME=/home/runner_user
+# RUN /home/runner_user/install_nix.sh \
+#   && rm /home/runner_user/install_nix.sh
+
+# ENTRYPOINT ["/home/runner_user/entrypoint.sh"]
+# CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/home/runner_user/entrypoint.sh", "./bin/Runner.Listener", "run", "--startuptype", "service"]

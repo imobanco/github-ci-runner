@@ -1,0 +1,53 @@
+name: Faz push da imagem
+
+on:
+  push:
+    branches:
+      - "main"
+      - "feature/CI"
+
+jobs:
+  push:
+    name: Build & Push
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        # Nix Flakes doesn't work on shallow clones
+        fetch-depth: 0
+
+    - name: Instala nix single user
+      run: |
+        test -d /nix || sudo mkdir -m 0755 /nix \
+        && sudo -k chown "$USER": /nix \
+        && BASE_URL='https://raw.githubusercontent.com/ES-Nix/get-nix/' \
+        && SHA256=5443257f9e3ac31c5f0da60332d7c5bebfab1cdf \
+        && NIX_RELEASE_VERSION='2.10.2' \
+        && curl -fsSL "${BASE_URL}""$SHA256"/get-nix.sh | sh -s -- ${NIX_RELEASE_VERSION} \
+        && . "$HOME"/.nix-profile/etc/profile.d/nix.sh \
+        && . ~/."$(ps -ocomm= -q $$)"rc \
+        && export TMPDIR=/tmp \
+        && nix flake --version
+        echo "$HOME"/.nix-profile/bin >> $GITHUB_PATH
+
+    # Remove podman via apt-get
+    - run: |
+        sudo apt-get purge -y podman containers-image containers-common
+        sudo apt-get autoremove --purge
+        sudo apt-get -y clean
+        podman --version || echo podman not installed
+
+    # Instala podman usando nix
+    # nix profile install nixpkgs#podman
+    # Não funciona pois não vem com os arquivos de configuração + permissões no new?idmap
+    - run: |
+        nix profile install github:ES-Nix/podman-rootless/83ff27be5616e3029c2aec2de595f86da081e857#podman
+        podman --version
+  
+    - name: Faz build e push da imagem
+      run: |
+        make build.and.push IMAGE_TAG=latest USERNAME=${{ github.actor }} PASSWORD=${{ secrets.GITHUB_TOKEN }}
+
+    - name: Lista imagens
+      run: podman images
