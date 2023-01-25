@@ -23,7 +23,7 @@ RUN addgroup runner_group \
 		--gecos "User" runner_user \
 		--ingroup runner_group \
 	&& chmod 0700 /home/runner_user \
-	&& echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+	&& echo "runner_user ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/runner_user
 
 RUN mkdir /home/runner_user/_work && mkdir /home/runner_user/runner-cli
 WORKDIR /home/runner_user/runner-cli
