@@ -37,3 +37,9 @@ source .env
 source .env
 ./ops/bash/runner_token.sh repo https://github.com/imobanco/github-ci-runner
 ```
+
+# Entrypoint
+```bash
+source .env
+RUNNER_SCOPE="org" SCOPE_TARGET="imobanco" bash ./ops/bash/entrypoint.sh
+```
