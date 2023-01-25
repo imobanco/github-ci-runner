@@ -12,7 +12,7 @@ export -n RUNNER_TOKEN
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET}))
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /home/runner_user/runner_token.sh ${RUNNER_SCOPE} ${SCOPE_TARGET})
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
@@ -24,7 +24,7 @@ _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/home/runner_user/_work-${_RUNNER_NAME}}
 _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
-_RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
+_RUN_AS_ROOT=${RUN_AS_ROOT:="false"}
 RUNNER_SCOPE="${RUNNER_SCOPE,,}" # to lowercase
 
 case ${RUNNER_SCOPE} in
@@ -123,10 +123,8 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
-    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    /usr/bin/chown -R runner "${_RUNNER_WORKDIR}" /home/runner_user/runner-cli
-    # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
-    /usr/sbin/gosu runner "$@"
+    echo "ERROR: RUN_AS_ROOT env var is set to false but the user has been overridden and is running as root with UID '$(id -u)'"
+    exit 1
   else
     "$@"
   fi
