@@ -2,15 +2,17 @@
   description = "Este é o nix (com flakes) para o ambiente de desenvolvimento do github-ci-runner";
 
   inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs";
+
     flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs_release_20_03.url = "github:NixOS/nixpkgs/release-20.03";
     podman-rootless.url = "github:ES-Nix/podman-rootless/from-nixpkgs";
+
+    podman-rootless.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = {
+  outputs = allAttrs@{
     self,
     nixpkgs,
-    nixpkgs_release_20_03,
     flake-utils,
     podman-rootless
   }:
@@ -23,35 +25,6 @@
           config = { allowUnfree = true; };
         };
 
-        pkgs_release_20_03 = import nixpkgs_release_20_03 {
-          # O nix flake check --refresh --show-trace .#
-          # quebra por conta de alguma(as) arquiteras
-          # quebradas nos pacotes que estão sendo usados
-          # deste canal.
-          #
-          # A discussão sobre como deve se terminar de resolver
-          # cross compilação com nix + flakes ainda não é
-          # completamente bem resolvida. Existem softwares
-          # feitos para funcionar em uma única arquitera e só
-          # foram pensados para esta, e no outro extremo
-          # existem os que em teoria deveriam ser muito portáveis.
-
-          system = "x86_64-linux";
-          # inherit system;
-          config = { allowUnfree = true; };
-        };
-
-        minimal-required-packages = with pkgsAllowUnfree; [
-          bash
-          coreutils
-          gnumake
-          podman-rootless.packages.${system}.podman
-        ];
-
-        # config = {
-        #  projectDir = ./.;
-        # };
-
         hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
           # Dont overwrite customised configuration
 
@@ -59,41 +32,36 @@
           echo -e '\n\n\n\e[32m\tAmbiente pronto!\e[0m\n'
           echo -e '\n\t\e[33mignore as proximas linhas...\e[0m\n\n\n'
         '';
+
+        # https://gist.github.com/tpwrules/34db43e0e2e9d0b72d30534ad2cda66d#file-flake-nix-L28
+        pleaseKeepMyInputs = pkgsAllowUnfree.writeTextDir "bin/.please-keep-my-inputs"
+          (builtins.concatStringsSep " " (builtins.attrValues allAttrs));
       in
       rec {
 
+        # nix fmt
+        formatter = pkgsAllowUnfree.nixpkgs-fmt;
 
+        /*
         packages.default = packages.${name};
-
-        packages.checkNixFormat = pkgsAllowUnfree.runCommand "check-nix-format" { } ''
-          ${pkgsAllowUnfree.nixpkgs-fmt}/bin/nixpkgs-fmt --check ${./.}
-
-          # For fix
-          # find . -type f -iname '*.nix' -exec nixpkgs-fmt {} \;
-
-          mkdir $out #sucess
-        '';
-
         apps.${name} = flake-utils.lib.mkApp {
           inherit name;
           drv = packages.${name};
         };
-
-        # env = pkgsAllowUnfree.poetry2nix.mkPoetryEnv config;
+        */
 
         devShells.default = pkgsAllowUnfree.mkShell {
           buildInputs = with pkgsAllowUnfree; [
-            #(pkgsAllowUnfree.poetry2nix.mkPoetryEnv config)
-
+            bashInteractive
+            coreutils
             curl
-            gnumake
             gettext
+            gnumake
             hack
+            httpie
+            jq
             patchelf
             podman-rootless.packages.${system}.podman
-            jq
-            httpie
-#            catatonit
           ];
 
           shellHook = ''
@@ -102,6 +70,14 @@
             export TMPDIR=/tmp
 
             echo "Entering the nix devShell no github-ci-runner"
+
+            test -d .profiles || mkdir -v .profiles
+
+            test -L .profiles/dev \
+            || nix develop .# --profile .profiles/dev --command true
+
+            test -L .profiles/dev-shell-default \
+            || nix build $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
 
             hack
           '';
