@@ -6,17 +6,18 @@
 
     flake-utils.url = "github:numtide/flake-utils";
     podman-rootless.url = "github:ES-Nix/podman-rootless/from-nixpkgs";
+    # sops-nix.url = "github:Mic92/sops-nix";
 
+    # sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     podman-rootless.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
     allAttrs@{ self
     , nixpkgs
-    , flake-utils
-    , podman-rootless
+    , ...
     }:
-    flake-utils.lib.eachDefaultSystem
+    allAttrs.flake-utils.lib.eachDefaultSystem
       (system:
       let
         name = "github-ci-runner";
@@ -51,16 +52,10 @@
         # nix fmt
         formatter = pkgsAllowUnfree.nixpkgs-fmt;
 
-        /*
-        packages.default = packages.${name};
-        apps.${name} = flake-utils.lib.mkApp {
-          inherit name;
-          drv = packages.${name};
-        };
-        */
-
         devShells.default = pkgsAllowUnfree.mkShell {
           buildInputs = with pkgsAllowUnfree; [
+            age
+            allAttrs.podman-rootless.packages.${system}.podman
             bashInteractive
             coreutils
             curl
@@ -70,7 +65,8 @@
             httpie
             jq
             patchelf
-            podman-rootless.packages.${system}.podman
+            sops
+            ssh-to-age
           ];
 
           shellHook = ''
@@ -91,6 +87,16 @@
             test -L .profiles/nixosConfigurations."$system".vm.config.system.build.vm \
             || nix build --impure --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
 
+            # For SOPS
+            # test -d ~/.config/sops/age || mkdir -pv ~/.config/sops/age
+            # test -f ~/.config/sops/age/keys.txt || age-keygen -o ~/.config/sops/age/keys.txt
+            # https://github.com/getsops/sops/pull/860/files#diff-7b3ed02bc73dc06b7db906cf97aa91dec2b2eb21f2d92bc5caa761df5bbc168fR192
+            # test -d secrets || mkdir -v secrets
+            # test -f secrets/secrets.yaml.encrypted \
+            # || sops \
+            # --encrypt \
+            # --age $(age-keygen -y ~/.config/sops/age/keys.txt) \
+            # secrets/secrets.yaml > secrets/secrets.yaml.encrypted
 
             hack
           '';
@@ -106,7 +112,7 @@
 
           ({ config, nixpkgs, pkgs, lib, modulesPath, ... }:
             let
-              nixuserKeys = "ssh-ed25519 AAAAC3NzaC1lZD...";
+              nixuserKeys = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExR+PSB/jBwJYKfpLN+MMXs3miRn70oELTV3sXdgzpr";
             in
             {
               # Internationalisation options
@@ -122,10 +128,8 @@
               fileSystems."/" = { device = "/dev/hda1"; };
 
               virtualisation.vmVariant = {
-                virtualisation.useNixStoreImage = false;
+                virtualisation.useNixStoreImage = false; # TODO: hardening
                 virtualisation.writableStore = true; # TODO: hardening
-
-                virtualisation.docker.enable = true;
 
                 programs.dconf.enable = true;
                 # security.polkit.enable = true; # TODO: hardening?
@@ -194,6 +198,8 @@
                   starship
                   which
 
+                  sops
+
                   github-runner
                   curl
                   jq
@@ -232,6 +238,7 @@
                 ];
               };
 
+              # imports = [ allAttrs.sops-nix.nixosModules.sops ];
               /*
                 https://github.com/NixOS/nixpkgs/issues/169812
                 https://github.com/actions/runner/issues/1882#issuecomment-1427930611
@@ -244,12 +251,31 @@
                 config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh
 
                 TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
-                services.github-runner.enable = true;
-                services.github-runner.url = "https://github.com/ORG_NAME";
-                services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
-                services.github-runner.extraPackages = with pkgs; [ config.virtualisation.docker.package ];
-                virtualisation.docker.enable = true;
-                systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
+                */
+              # services.github-runner.enable = true;
+              # services.github-runner.url = "https://github.com/imobanco";
+              # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
+              # services.github-runner.extraPackages = with pkgs; [ config.virtualisation.docker.package ];
+              # virtualisation.docker.enable = true;
+              # systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
+
+              /*
+              https://github.com/vimjoyer/sops-nix-video/tree/25e5698044e60841a14dcd64955da0b1b66957a2
+              https://github.com/Mic92/sops-nix/issues/65#issuecomment-929082304
+              https://discourse.nixos.org/t/qmenu-secrets-sops-and-nixos/13621/8
+              https://www.youtube.com/watch?v=1BquzE3Yb4I
+              https://github.com/FiloSottile/age#encrypting-to-a-github-user
+              https://devops.datenkollektiv.de/using-sops-with-age-and-git-like-a-pro.html
+
+              sudo cat /run/secrets/example-key
+              */
+              /*
+              sops.defaultSopsFile = ./secrets/secrets.yaml.encrypted;
+              sops.defaultSopsFormat = "yaml";
+              sops.gnupg.sshKeyPaths = [];
+              sops.age.sshKeyPaths = [];
+              sops.age.keyFile = ./secrets/keys.txt;
+              sops.secrets.example-key = { };
               */
 
               programs.zsh = {
@@ -378,7 +404,8 @@
             })
 
         ];
-        specialArgs = { inherit nixpkgs; };
+        specialArgs = { inherit nixpkgs allAttrs; };
+
       };
     };
 }

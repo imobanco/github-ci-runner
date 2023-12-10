@@ -1,4 +1,4 @@
-
+secrets/*.yaml
 .idea/
 .env
 .direnv/
