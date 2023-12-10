@@ -43,7 +43,15 @@
 
         packages.vm = self.nixosConfigurations.vm.config.system.build.toplevel;
 
+        /*
         # Utilized by `nix run .#<name>`
+
+        rm -fv nixos.qcow2
+        nix run --impure --refresh --verbose .#vm
+
+        # Open the QMEU VM terminal and:
+        start-github-runner-with-pat "$PAT"
+        */
         apps.vm = {
           type = "app";
           program = "${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm";
