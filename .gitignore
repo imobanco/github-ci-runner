@@ -3,3 +3,4 @@
 .env
 .direnv/
 .profiles/
+*.qcow2
