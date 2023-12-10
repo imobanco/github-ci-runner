@@ -29,7 +29,9 @@ jobs:
           docker images
           docker info
 
-      - name: Run alpine OCI image with docker
+      - name: Run alpine OCI image with docker and metadatas
         run: |
           docker run alpine cat /etc/os*release
           cat /etc/os*release
+          uname -a
+          nix flake metadata nixpkgs
