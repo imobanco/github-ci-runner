@@ -22,14 +22,14 @@ jobs:
       - name: Rodar um echo
         run: echo 'teste'
 
-      - name: Instala podman
+      - name: Executa docker do host
         run: |
           # sudo apt-get install -y podman
           docker pull alpine
           docker images
           docker info
 
-      - name: Run alpine
+      - name: Run alpine OCI image with docker
         run: |
           docker run alpine cat /etc/os*release
           cat /etc/os*release
