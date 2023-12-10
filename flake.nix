@@ -214,11 +214,12 @@
                       # https://github.com/actions/runner/issues/323#issuecomment-583640437
                       # https://github.com/actions/runner/issues/2538#issuecomment-1517988404
                       config.sh \
+                      --ephemeral \
+                      --pat "$PAT" \
+                      --replace \
+                      --runasservice \
                       --unattended \
                       --url https://github.com/imobanco/github-ci-runner \
-                      --pat "$PAT" \
-                      --ephemeral \
-                      --replace \
                       && run.sh
                     ''
                   )
@@ -259,6 +260,7 @@
               # virtualisation.docker.enable = true;
               # systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
 
+              virtualisation.docker.enable = true;
               /*
               https://github.com/vimjoyer/sops-nix-video/tree/25e5698044e60841a14dcd64955da0b1b66957a2
               https://github.com/Mic92/sops-nix/issues/65#issuecomment-929082304
