@@ -32,3 +32,4 @@ jobs:
       - name: Run alpine
         run: |
           docker run alpine cat /etc/os*release
+          cat /etc/os*release
