@@ -25,6 +25,8 @@ jobs:
       - name: Instala podman
         run: |
           # sudo apt-get install -y podman
+          docker pull alpine
+          docker images
           docker info
 
       - name: Run alpine
