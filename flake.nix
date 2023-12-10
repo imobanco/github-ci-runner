@@ -204,9 +204,9 @@
                       #! ${pkgs.runtimeShell} -e
 
                       PAT="$1"
-                      # https://github.com/actions/runner/issues/323#issuecomment-583640437
-                      export ACTIONS_RUNNER_INPUT_REPLACE=Y
 
+                      # https://github.com/actions/runner/issues/323#issuecomment-583640437
+                      # https://github.com/actions/runner/issues/2538#issuecomment-1517988404
                       config.sh \
                       --unattended \
                       --url https://github.com/imobanco/github-ci-runner \
