@@ -1,0 +1,37 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branchs:
+      - 'feature/**'
+      - 'fix/**'
+      - 'refactor/**'
+
+
+jobs:
+  test:
+    runs-on: self-hosted
+    name: Testes
+    steps:
+      - name: checkout PR merge commit
+        uses: actions/checkout@v3
+
+      - name: Rodar um echo
+        run: echo 'teste'
+
+      - name: Executa docker do host
+        run: |
+          # sudo apt-get install -y podman
+          docker pull alpine
+          docker images
+          docker info
+
+      - name: Run alpine OCI image with docker and metadatas
+        run: |
+          docker run alpine cat /etc/os*release
+          cat /etc/os*release
+          uname -a
+          nix flake metadata nixpkgs

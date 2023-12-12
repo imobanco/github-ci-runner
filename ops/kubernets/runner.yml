@@ -1,0 +1,27 @@
+apiVersion: v1
+
+kind: Pod
+
+metadata:
+    name: github-ci-runner
+    labels:
+        app: github-ci-runner
+    annotations:
+        io.podman.annotations.init.container.type: "once"
+
+spec:
+    restartPolicy: Always
+
+    containers:
+        - name: service-runner
+          image: ghcr.io/imobanco/github-ci-runner:latest
+          resources: {}
+          securityContext:
+              capabilities: {}
+          env:
+              - name: ACCESS_TOKEN
+                value: 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
+              - name: POSTGRES_USER
+                value: postgres
+              - name: POSTGRES_DB
+                value: postgres
