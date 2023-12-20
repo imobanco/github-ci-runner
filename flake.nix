@@ -139,7 +139,7 @@
 
               virtualisation.vmVariant = {
 
-                virtualisation.useNixStoreImage = false;
+                virtualisation.useNixStoreImage = false; # TODO: hardening
                 virtualisation.writableStore = true; # TODO: hardening
 
                 virtualisation.docker.enable = true;
@@ -241,6 +241,7 @@
                 shellAliases = {
                   vim = "nvim";
                   k = "kubectl";
+                  kaf = "kubectl apply -f";
                 };
                 enableCompletion = true;
                 autosuggestions.enable = true;
