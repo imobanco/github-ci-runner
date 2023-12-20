@@ -425,6 +425,17 @@
                 flannel.enable = true;
               };
 
+              # TODO: refatorar, talvez usar self?
+              environment.etc."kubernets/kubernetes-examples/minimal-pod-with-busybox-example/minimal-pod-with-busybox-example.yaml" = {
+                mode = "0644";
+                text = "${builtins.readFile ./kubernetes-examples/minimal-pod-with-busybox-example/minimal-pod-with-busybox-example.yaml}";
+              };
+
+              environment.etc."kubernets/kubernetes-examples/minimal-pod-with-busybox-example/notes.md" = {
+                mode = "0644";
+                text = "${builtins.readFile ./kubernetes-examples/minimal-pod-with-busybox-example/notes.md}";
+              };
+
               environment.etc."kubernets/kubernetes-examples/appvia/deployment.yaml" = {
                 mode = "0644";
                 text = "${builtins.readFile ./kubernetes-examples/appvia/deployment.yaml}";
