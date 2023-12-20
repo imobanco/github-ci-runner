@@ -354,7 +354,7 @@
                 package = pkgs.nixVersions.nix_2_10;
                 readOnlyStore = true;
                 registry.nixpkgs.flake = nixpkgs; # https://bou.ke/blog/nix-tips/
-                nixPath = ["nixpkgs=${pkgs.path}"];
+                nixPath = [ "nixpkgs=${pkgs.path}" ];
               };
 
               environment.etc."channels/nixpkgs".source = "${pkgs.path}";
@@ -481,6 +481,7 @@
 
         ];
         specialArgs = { inherit nixpkgs allAttrs; };
+
       };
     };
 }
