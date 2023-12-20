@@ -117,7 +117,9 @@
         system = builtins.currentSystem;
 
         modules = [
-
+          # export QEMU_NET_OPTS="hostfwd=tcp::2200-:10022" && nix run .#vm
+          # Then connect with ssh -p 2200 nixuser@localhost
+          # ps -p $(pgrep -f qemu-kvm) -o args | tr ' ' '\n'
           ({ config, nixpkgs, pkgs, lib, modulesPath, ... }:
             let
               nixuserKeys = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExR+PSB/jBwJYKfpLN+MMXs3miRn70oELTV3sXdgzpr";
@@ -136,14 +138,17 @@
               fileSystems."/" = { device = "/dev/hda1"; };
 
               virtualisation.vmVariant = {
-                virtualisation.useNixStoreImage = false; # TODO: hardening
+
+                virtualisation.useNixStoreImage = false;
                 virtualisation.writableStore = true; # TODO: hardening
+
+                virtualisation.docker.enable = true;
 
                 programs.dconf.enable = true;
                 # security.polkit.enable = true; # TODO: hardening?
 
-                virtualisation.memorySize = 1024 * 2; # Use MiB memory.
-                virtualisation.diskSize = 1024 * 16; # Use MiB memory.
+                virtualisation.memorySize = 1024 * 10; # Use MiB memory.
+                virtualisation.diskSize = 1024 * 50; # Use MiB memory.
                 virtualisation.cores = 8; # Number of cores.
                 virtualisation.graphics = true;
 
@@ -160,6 +165,9 @@
                   "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
                   "-device virtio-serial-pci"
                   "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
+
+                  # https://serverfault.com/a/1119403
+                  # "-device intel-iommu,intremap=on"
                 ];
               };
 
@@ -196,44 +204,22 @@
                 ];
                 packages = with pkgs; [
                   awscli
+                  bashInteractive
                   btop
                   coreutils
                   direnv
                   file
+                  firefox
                   git
                   gnumake
+                  kubernetes-helm
+                  nix-info
                   openssh
+                  openssl
                   starship
                   which
 
-                  sops
-
-                  github-runner
-                  curl
-                  jq
-                  httpie
-
-                  (
-                    writeScriptBin "start-github-runner-with-pat" ''
-                      #! ${pkgs.runtimeShell} -e
-
-                      PAT="$1"
-
-                      # https://github.com/actions/runner/issues/323#issuecomment-583640437
-                      # https://github.com/actions/runner/issues/2538#issuecomment-1517988404
-                      config.sh \
-                      --ephemeral \
-                      --pat "$PAT" \
-                      --replace \
-                      --runasservice \
-                      --unattended \
-                      --url https://github.com/imobanco/github-ci-runner \
-                      && run.sh
-                    ''
-                  )
-
                 ];
-
                 shell = pkgs.zsh;
                 uid = 1234;
                 autoSubUidGidRange = true;
@@ -247,49 +233,15 @@
                 ];
               };
 
-              # imports = [ allAttrs.sops-nix.nixosModules.sops ];
-              /*
-                https://github.com/NixOS/nixpkgs/issues/169812
-                https://github.com/actions/runner/issues/1882#issuecomment-1427930611
-
-                nix shell nixpkgs#github-runner --command \
-                sh \
-                -c \
-                'config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh'
-
-                config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh
-
-                TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
-                */
-              # services.github-runner.enable = true;
-              # services.github-runner.url = "https://github.com/imobanco";
-              # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
-              # services.github-runner.extraPackages = with pkgs; [ config.virtualisation.docker.package ];
-              # virtualisation.docker.enable = true;
-              # systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
-
-              virtualisation.docker.enable = true;
-              /*
-              https://github.com/vimjoyer/sops-nix-video/tree/25e5698044e60841a14dcd64955da0b1b66957a2
-              https://github.com/Mic92/sops-nix/issues/65#issuecomment-929082304
-              https://discourse.nixos.org/t/qmenu-secrets-sops-and-nixos/13621/8
-              https://www.youtube.com/watch?v=1BquzE3Yb4I
-              https://github.com/FiloSottile/age#encrypting-to-a-github-user
-              https://devops.datenkollektiv.de/using-sops-with-age-and-git-like-a-pro.html
-
-              sudo cat /run/secrets/example-key
-              */
-              /*
-              sops.defaultSopsFile = ./secrets/secrets.yaml.encrypted;
-              sops.defaultSopsFormat = "yaml";
-              sops.gnupg.sshKeyPaths = [];
-              sops.age.sshKeyPaths = [];
-              sops.age.keyFile = ./secrets/keys.txt;
-              sops.secrets.example-key = { };
-              */
-
+              # https://github.com/NixOS/nixpkgs/blob/3a44e0112836b777b176870bb44155a2c1dbc226/nixos/modules/programs/zsh/oh-my-zsh.nix#L119
+              # https://discourse.nixos.org/t/nix-completions-for-zsh/5532
+              # https://github.com/NixOS/nixpkgs/blob/09aa1b23bb5f04dfc0ac306a379a464584fc8de7/nixos/modules/programs/zsh/zsh.nix#L230-L231
               programs.zsh = {
                 enable = true;
+                shellAliases = {
+                  vim = "nvim";
+                  k = "kubectl";
+                };
                 enableCompletion = true;
                 autosuggestions.enable = true;
                 syntaxHighlighting.enable = true;
@@ -332,6 +284,31 @@
                 enableGhostscriptFonts = true;
               };
 
+              # Hack to fix annoying zsh warning, too overkill probably
+              # https://www.reddit.com/r/NixOS/comments/cg102t/how_to_run_a_shell_command_upon_startup/eudvtz1/?utm_source=reddit&utm_medium=web2x&context=3
+              # https://stackoverflow.com/questions/638975/how-wdo-i-tell-if-a-regular-file-does-not-exist-in-bash#comment25226870_638985
+              systemd.user.services.fix-zsh-warning = {
+                script = ''
+                  test -f /home/nixuser/.zshrc || touch /home/nixuser/.zshrc && chown nixuser: -Rv /home/nixuser
+                '';
+                wantedBy = [ "default.target" ];
+              };
+
+              # journalctl -u fix-k8s.service -b -f
+              systemd.services.fix-k8s = {
+                script = ''
+                  echo "Fixing k8s"
+
+                  CLUSTER_ADMIN_KEY_PATH=/var/lib/kubernetes/secrets/cluster-admin-key.pem
+
+                  while ! test -f "$CLUSTER_ADMIN_KEY_PATH"; do echo $(date +'%d/%m/%Y %H:%M:%S:%3N'); sleep 0.5; done
+
+                  chmod 0660 -v "$CLUSTER_ADMIN_KEY_PATH"
+                  chown root:kubernetes -v "$CLUSTER_ADMIN_KEY_PATH"
+                '';
+                wantedBy = [ "multi-user.target" ];
+              };
+
               # Enable ssh
               services.sshd.enable = true;
 
@@ -349,20 +326,11 @@
                 ];
               };
 
-              # Hack to fix annoying zsh warning, too overkill probably
-              # https://www.reddit.com/r/NixOS/comments/cg102t/how_to_run_a_shell_command_upon_startup/eudvtz1/?utm_source=reddit&utm_medium=web2x&context=3
-              systemd.user.services.fix-zsh-warning = {
-                script = ''
-                  echo "Fixing a zsh warning"
-                  # https://stackoverflow.com/questions/638975/how-wdo-i-tell-if-a-regular-file-does-not-exist-in-bash#comment25226870_638985
-                  test -f /home/nixuser/.zshrc || touch /home/nixuser/.zshrc && chown nixuser: -Rv /home/nixuser
-                '';
-                wantedBy = [ "default.target" ];
-              };
-
               # https://nixos.wiki/wiki/Libvirt
               # https://discourse.nixos.org/t/set-up-vagrant-with-libvirt-qemu-kvm-on-nixos/14653
               boot.extraModprobeConfig = "options kvm_intel nested=1";
+
+              services.qemuGuest.enable = true;
 
               # X configuration
               services.xserver.enable = true;
@@ -380,19 +348,16 @@
               services.spice-vdagentd.enable = true;
 
               nixpkgs.config.allowUnfree = true;
+
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
                 package = pkgs.nixVersions.nix_2_10;
                 readOnlyStore = true;
                 registry.nixpkgs.flake = nixpkgs; # https://bou.ke/blog/nix-tips/
-
-                nixPath = [
-                  "nixpkgs=/etc/channels/nixpkgs"
-                  "nixos-config=/etc/nixos/configuration.nix"
-                ];
+                nixPath = ["nixpkgs=${pkgs.path}"];
               };
 
-              environment.etc."channels/nixpkgs".source = nixpkgs.outPath;
+              environment.etc."channels/nixpkgs".source = "${pkgs.path}";
 
               environment.systemPackages = with pkgs; [
                 bashInteractive
@@ -408,6 +373,107 @@
                 zsh-autosuggestions
                 zsh-completions
 
+                # Looks like kubernetes needs at least all this
+                kubectl
+                kubernetes
+                #
+                cni
+                cni-plugins
+                conntrack-tools
+                cri-o
+                cri-tools
+                ebtables
+                ethtool
+                flannel
+                iptables
+                socat
+
+                (
+                  writeScriptBin "fix-k8s-cluster-admin-key" ''
+                    #! ${pkgs.runtimeShell} -e
+                    sudo chmod 0660 -v /var/lib/kubernetes/secrets/cluster-admin-key.pem
+                    sudo chown root:kubernetes -v /var/lib/kubernetes/secrets/cluster-admin-key.pem
+                  ''
+                )
+              ];
+
+              # Is this a must to kubernetes?
+              swapDevices = pkgs.lib.mkForce [ ];
+
+              # Is it a must for k8s?
+              # Take a look into:
+              # https://github.com/NixOS/nixpkgs/blob/9559834db0df7bb274062121cf5696b46e31bc8c/nixos/modules/services/cluster/kubernetes/kubelet.nix#L255-L259
+              boot.kernel.sysctl = {
+                # If it is enabled it conflicts with what kubelet is doing
+                # "net.bridge.bridge-nf-call-ip6tables" = 1;
+                # "net.bridge.bridge-nf-call-iptables" = 1;
+
+                # https://docs.projectcalico.org/v3.9/getting-started/kubernetes/installation/migration-from-flannel
+                # https://access.redhat.com/solutions/53031
+                "net.ipv4.conf.all.rp_filter" = 1;
+                # https://www.tenable.com/audits/items/CIS_Debian_Linux_8_Server_v2.0.2_L1.audit:bb0f399418f537997c2b44741f2cd634
+                # "net.ipv4.conf.default.rp_filter" = 1;
+                "vm.swappiness" = 0;
+              };
+
+              environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
+
+              services.kubernetes.roles = [ "master" "node" ];
+              services.kubernetes.masterAddress = "nixos";
+              services.kubernetes = {
+                flannel.enable = true;
+              };
+
+              environment.etc."kubernets/kubernetes-examples/appvia/deployment.yaml" = {
+                mode = "0644";
+                text = "${builtins.readFile ./kubernetes-examples/appvia/deployment.yaml}";
+              };
+
+              environment.etc."kubernets/kubernetes-examples/appvia/service.yaml" = {
+                mode = "0644";
+                text = "${builtins.readFile ./kubernetes-examples/appvia/service.yaml}";
+              };
+
+              environment.etc."kubernets/kubernetes-examples/appvia/ingress.yaml" = {
+                mode = "0644";
+                text = "${builtins.readFile ./kubernetes-examples/appvia/ingress.yaml}";
+              };
+
+              environment.etc."kubernets/kubernetes-examples/appvia/notes.md" = {
+                mode = "0644";
+                text = "${builtins.readFile ./kubernetes-examples/appvia/notes.md}";
+              };
+
+              # journalctl -u move-kubernetes-examples.service -b
+              systemd.services.move-kubernetes-examples = {
+                script = ''
+                  echo "Started move-kubernets-examples"
+
+                  # cp -rv ''\${./kubernetes-examples} /home/nixuser/
+                  cp -Rv /etc/kubernets/kubernetes-examples/ /home/nixuser/
+
+                  chown -Rv nixuser:nixgroup /home/nixuser/kubernetes-examples
+
+                  kubectl \
+                    apply \
+                    --file /home/nixuser/kubernetes-examples/deployment.yaml \
+                    --file /home/nixuser/kubernetes-examples/service.yaml \
+                    --file /home/nixuser/kubernetes-examples/ingress.yaml
+                '';
+                wantedBy = [ "multi-user.target" ];
+              };
+
+              # https://discourse.nixos.org/t/nixos-firewall-with-kubernetes/23673/2
+              # networking.firewall.trustedInterfaces ??
+              networking.firewall.allowedTCPPorts = [ 8000 8080 8443 9000 9443 ];
+
+              boot.kernelParams = [
+                "swapaccount=0"
+                "systemd.unified_cgroup_hierarchy=0"
+                "group_enable=memory"
+                "cgroup_enable=cpuset"
+                "cgroup_memory=1"
+                "cgroup_enable=memory"
               ];
 
               system.stateVersion = "22.11";
@@ -415,7 +481,6 @@
 
         ];
         specialArgs = { inherit nixpkgs allAttrs; };
-
       };
     };
 }
