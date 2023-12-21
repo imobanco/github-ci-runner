@@ -277,3 +277,4 @@ helm install "${INSTALLATION_NAME}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 ```
+
