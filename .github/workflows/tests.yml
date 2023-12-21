@@ -29,10 +29,11 @@ jobs:
           cat /etc/group
           uname -a
           id
+          sudo id
 
       - name: Executa docker do host
         run: |
-           apt-get update && apt-get install -y curl
+           sudo apt-get update && sudo apt-get install -y curl
 
       - name: Instala nix single user
         run: |
