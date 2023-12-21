@@ -68,6 +68,7 @@
             coreutils
             curl
             gettext
+            gh
             gnumake
             hack
             httpie
@@ -223,6 +224,7 @@
                   direnv
                   file
                   firefox
+                  gh
                   git
                   gnumake
                   kubernetes-helm

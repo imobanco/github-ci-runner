@@ -86,11 +86,7 @@ helm install arc \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-```
 
-
-
-```bash
 while true; do
   kubectl get pod --all-namespaces -o wide \
   && echo \
