@@ -169,6 +169,10 @@
                   # https://serverfault.com/a/1119403
                   # "-device intel-iommu,intremap=on"
                 ];
+
+                virtualisation.forwardPorts = [
+                  { from = "host"; host.port = 8080; guest.port = 8080; }
+                ];
               };
 
               users.users.root = {
@@ -477,7 +481,16 @@
 
               # https://discourse.nixos.org/t/nixos-firewall-with-kubernetes/23673/2
               # networking.firewall.trustedInterfaces ??
-              networking.firewall.allowedTCPPorts = [ 8000 8080 8443 9000 9443 ];
+              # networking.firewall.allowedTCPPorts = [ 80 8000 8080 8443 9000 9443 ];
+              networking.firewall.enable = false;
+
+              environment.etc."containers/registries.conf" = {
+                mode = "0644";
+                text = ''
+                  [registries.search]
+                  registries = ['docker.io', 'localhost', 'us-docker.pkg.dev', 'gcr.io']
+                '';
+              };
 
               boot.kernelParams = [
                 "swapaccount=0"

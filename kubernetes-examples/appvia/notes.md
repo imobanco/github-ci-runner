@@ -14,7 +14,7 @@ while true; do
   && kubectl get services --all-namespaces -o wide \
   && echo \
   && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
+  sleep 1;
   clear;
 done
 ```
