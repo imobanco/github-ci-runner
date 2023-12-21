@@ -1,5 +1,17 @@
 
 
+Originalmente encontrado aqui:
+https://kubernetes.io/docs/tutorials/stateless-application/guestbook
+
+Está quebrado! Pelo menos uma das imagens usadas não existem mais!
+```bash
+docker pull gcr.io/google_samples/gb-frontend:v5
+```
+Refs.:
+- https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-guestbook-frontend-deployment
+
+
+Encontrei o repo original, mas também não consegui fazer funcionar 100%.
 
 
 https://cloud.google.com/kubernetes-engine/docs/tutorials/guestbook
@@ -20,6 +32,7 @@ kubectl apply \
 ```bash
 kubectl get service frontend
 ```
+
 
 ```bash
 while true; do

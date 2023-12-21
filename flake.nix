@@ -168,10 +168,19 @@
 
                   # https://serverfault.com/a/1119403
                   # "-device intel-iommu,intremap=on"
+
+                  # "-net user,hostfwd=tcp::8090-::8080"
                 ];
 
+                # https://discourse.nixos.org/t/nixpkgs-support-for-linux-builders-running-on-macos/24313/2
                 virtualisation.forwardPorts = [
-                  { from = "host"; host.port = 8080; guest.port = 8080; }
+                  {
+                    from = "host";
+                    # host.address = "127.0.0.1";
+                    host.port = 8090;
+                    # guest.address = "34.74.203.201";
+                    guest.port = 30163;
+                  }
                 ];
               };
 
@@ -369,9 +378,10 @@
                 openssh
 
                 direnv
-                nix-direnv
                 fzf
+                jq
                 neovim
+                nix-direnv
                 nixos-option
                 oh-my-zsh
                 zsh

@@ -64,6 +64,50 @@ GITHUB_TOKEN=ghp_yyyyyyyyyyyyyyy
 ```
 
 
+###
+
+https://docs.github.com/en/enterprise-server@3.11/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/quickstart-for-actions-runner-controller
+
+Substitua pelo seu PAT:
+```bash
+GITHUB_PAT=ghp_yyyyyyyyyyyyyyy
+
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
+
+helm install arc \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+&& helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+```
+
+
+
+```bash
+while true; do
+  kubectl get pod --all-namespaces -o wide \
+  && echo \
+  && kubectl get services --all-namespaces -o wide \
+  && echo \
+  && kubectl get deployments.apps --all-namespaces -o wide \
+  && echo \
+  && kubectl get nodes --all-namespaces -o wide; 
+  sleep 2;
+  clear;
+done
+```
+
+
+
+### 
+
 
 ```bash
 # Bem haky, só bypassei o problema que deixava como pending
@@ -223,14 +267,13 @@ kubectl describe pod "$POD_NAME" -n "$NAME_SPACE_RUNNER"
 
 TODO: 
 Pq esse comando não termina?
-O que esse comando faz exatamente?
+O que esse comando faz exatamente? Explicação:
+https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#viewing-the-frontend-service-via-kubectl-port-forward
 ```bash
 kubectl \
 --namespace "$NAME_SPACE_RUNNER" \
 port-forward $POD_NAME 8080:$CONTAINER_PORT
 ```
-
-
 
 
 ```bash
@@ -241,40 +284,46 @@ Refs.:
 - https://mac-blog.org.ua/github-actions-kubernetes-runner-without-certmanager/
 
 
+
+### 
+
+
 ```bash
-while ! false; do
-  kubectl get pod --all-namespaces -o wide \
-  && echo \
-  && kubectl get services --all-namespaces -o wide \
-  && echo \
-  && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
-  clear;
-done
+GITHUB_TOKEN=ghp_yyyyyyyyyyyyyyy
 ```
 
 
-
-https://docs.github.com/en/enterprise-server@3.11/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/quickstart-for-actions-runner-controller
-
 ```bash
-NAMESPACE="arc-systems"
-helm install arc \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
-```
+NAME_SPACE_RUNNER='actions-runner-system'
 
-```bash
-INSTALLATION_NAME="arc-runner-set"
-NAMESPACE="arc-runners"
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-GITHUB_PAT="ghp_xxxxxxxxxxxxxxx"
-helm install "${INSTALLATION_NAME}" \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+helm repo add jetstack https://charts.jetstack.io
+
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.12.4 \
+  --set installCRDs=true
+
+curl -L https://github.com/summerwind/actions-runner-controller/releases/latest/download/actions-runner-controller.yaml > actions-runner-controller.yaml
+
+kubectl apply -f actions-runner-controller.yaml
+
+kubectl create secret generic controller-manager \
+--from-literal=github_token=${GITHUB_TOKEN} \
+-n actions-runner-system
+
+cat > runner.yaml <<-'EOF'
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: Runner
+metadata:
+  name: example-runner
+spec:
+  repository: summerwind/actions-runner-controller
+  env: []
+EOF
+
+kubectl apply -f runner.yaml -n "$NAME_SPACE_RUNNER"
 ```
 

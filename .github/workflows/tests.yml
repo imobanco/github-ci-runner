@@ -1,14 +1,15 @@
 name: tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branchs:
-      - 'feature/**'
-      - 'fix/**'
-      - 'refactor/**'
+on: workflow_dispatch
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branchs:
+#       - 'feature/**'
+#       - 'fix/**'
+#       - 'refactor/**'
 
 
 jobs:
