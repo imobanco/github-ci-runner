@@ -26,7 +26,9 @@ jobs:
       - name: Metadatas
         run: |
           cat /etc/os*release
+          cat /etc/groups
           uname -a
+          id
 
       - name: Executa docker do host
         run: |
