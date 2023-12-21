@@ -100,6 +100,18 @@ while true; do
 done
 ```
 
+Verifique que o runner aparece no link:
+https://github.com/imobanco/github-ci-runner/actions/runners?tab=self-hosted
+
+
+```bash
+export GH_TOKEN=ghp_yyyyyyyyyyyyyyy
+```
+
+
+```bash
+gh workflow run tests.yml --ref feature/k8s
+```
 
 
 ### 
