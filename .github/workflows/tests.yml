@@ -31,7 +31,7 @@ jobs:
           id
           sudo id
 
-      - name: Executa docker do host
+      - name: Executa instalação via apt para teste mínimo
         run: |
-           sudo apt-get update && sudo apt-get install -y curl hello xz-utils
+           sudo apt-get update && sudo apt-get install -y hello
            hello
