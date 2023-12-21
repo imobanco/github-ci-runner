@@ -131,6 +131,9 @@
               # i18n.defaultLocale = "pt_BR.UTF-8";
               console.keyMap = "br-abnt2";
 
+              # Set your time zone.
+              time.timeZone = "America/Recife";
+
               # Why
               # nix flake show --impure .#
               # break if it does not exists?
@@ -435,6 +438,7 @@
 
               environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
 
+              # services.kubernetes.kubelet.seedDockerImages = [];
               services.kubernetes.roles = [ "master" "node" ];
               services.kubernetes.masterAddress = "nixos";
               services.kubernetes = {

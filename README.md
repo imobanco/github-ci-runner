@@ -45,10 +45,7 @@ RUNNER_SCOPE="org" SCOPE_TARGET="imobanco" bash ./ops/bash/entrypoint.sh
 ```
 
 
-# k8s in NixOS VM
-
-
-
+# github self-hosted runner em k8s em uma VM NixOS
 
 Gerar token:
 - onde gerar: https://github.com/settings/tokens
@@ -104,6 +101,8 @@ export GH_TOKEN=ghp_yyyyyyyyyyyyyyy
 ```bash
 gh workflow run tests.yml --ref feature/k8s
 ```
+Refs.:
+- https://docs.github.com/en/enterprise-server@3.11/actions/using-workflows/manually-running-a-workflow?tool=cli#running-a-workflow
 
 Pelo navegador:
 https://github.com/imobanco/github-ci-runner/actions
