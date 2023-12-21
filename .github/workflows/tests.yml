@@ -33,7 +33,7 @@ jobs:
 
       - name: Executa docker do host
         run: |
-           sudo apt-get update && sudo apt-get install -y curl
+           sudo apt-get update && sudo apt-get install -y curl xz
 
       - name: Instala nix single user
         run: |
