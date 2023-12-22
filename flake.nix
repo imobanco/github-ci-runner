@@ -151,7 +151,7 @@
                 programs.dconf.enable = true;
                 # security.polkit.enable = true; # TODO: hardening?
 
-                virtualisation.memorySize = 1024 * 10; # Use MiB memory.
+                virtualisation.memorySize = 1024 * 8; # Use MiB memory.
                 virtualisation.diskSize = 1024 * 50; # Use MiB memory.
                 virtualisation.cores = 8; # Number of cores.
                 virtualisation.graphics = true;
