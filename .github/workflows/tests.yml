@@ -33,7 +33,7 @@ jobs:
 
       - name: Executa instalação via apt para teste mínimo
         run: |
-           sudo apt-get update && sudo apt-get install -y hello
+           sudo apt-get update && sudo apt-get install -y hello curl xz-utils
            hello
 
       - name: Instala nix single user
