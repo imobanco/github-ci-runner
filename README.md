@@ -155,42 +155,14 @@ GITHUB_PAT=ghp_yyyyyyyyyyyyyyy
 ```
 
 
-```bash
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-INSTALLATION_NAME="arc-runner-set"
-NAMESPACE="arc-runners"
-
-helm install arc \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-&& helm install "${INSTALLATION_NAME}" \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-
-while true; do
-  kubectl get pod --all-namespaces -o wide \
-  && echo \
-  && kubectl get services --all-namespaces -o wide \
-  && echo \
-  && kubectl get deployments.apps --all-namespaces -o wide \
-  && echo \
-  && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
-  clear;
-done
-```
-
 
 
 
 ```bash
 cd "$HOME" \
 && git clone https://github.com/actions/actions-runner-controller.git \
-&& cd actions-runner-controller
+&& cd actions-runner-controller \
+&& git checkout 1f9b7541e6545a9d5ffa052481a84aad7ba4aa4d
 
 
 cat << 'EOF' > enables-dind.patch
@@ -218,9 +190,43 @@ index 021fecb..b474e88 100644
 -#   name: test-arc-gha-runner-scale-set-controller
 +controllerServiceAccount:
 +  namespace: arc-system
++  name: test-arc-gha-runner-scale-set-controller
 EOF
 
 git apply enables-dind.patch
+```
+
+
+```bash
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
+
+helm install arc \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+&& helm install arc-runner-set \
+    --create-namespace \
+    --namespace "${NAMESPACE}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set image.tag="0.4.0" \
+    --version "0.4.0" \
+    -f ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+while true; do
+  kubectl get pod --all-namespaces -o wide \
+  && echo \
+  && kubectl get services --all-namespaces -o wide \
+  && echo \
+  && kubectl get deployments.apps --all-namespaces -o wide \
+  && echo \
+  && kubectl get nodes --all-namespaces -o wide; 
+  sleep 2;
+  clear;
+done
 ```
 
 
