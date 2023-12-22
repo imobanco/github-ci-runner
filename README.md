@@ -57,10 +57,13 @@ rm -fv nixos.qcow2; nix run --impure --refresh --verbose .#vm
 ```
 
 
-Copie e cole no terminal da VM e edite com seu PAT gerado no pasos anterior:
+Copie e cole no terminal da VM e EDITE com seu PAT gerado no pasos anterior:
 ```bash
 GITHUB_PAT=ghp_yyyyyyyyyyyyyyy
+```
 
+
+```bash
 GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
 INSTALLATION_NAME="arc-runner-set"
 NAMESPACE="arc-runners"

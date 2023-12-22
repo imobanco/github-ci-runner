@@ -10,6 +10,10 @@ docker pull gcr.io/google_samples/gb-frontend:v5
 Refs.:
 - https://kubernetes.io/docs/tutorials/stateless-application/guestbook/#creating-the-guestbook-frontend-deployment
 
+```bash
+journalctl --unit docker
+```
+
 
 Encontrei o repo original, mas também não consegui fazer funcionar 100%.
 
