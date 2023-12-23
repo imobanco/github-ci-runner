@@ -64,32 +64,26 @@ GITHUB_PAT=ghp_yyyyyyyyyyyyyyy
 
 
 ```bash
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-INSTALLATION_NAME="arc-runner-set"
-NAMESPACE="arc-runners"
+NAMESPACE="arc-systems"
 
 helm install arc \
     --namespace "${NAMESPACE}" \
     --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-&& helm install "${INSTALLATION_NAME}" \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+
+
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
     --namespace "${NAMESPACE}" \
     --create-namespace \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
-while true; do
-  kubectl get pod --all-namespaces -o wide \
-  && echo \
-  && kubectl get services --all-namespaces -o wide \
-  && echo \
-  && kubectl get deployments.apps --all-namespaces -o wide \
-  && echo \
-  && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
-  clear;
-done
+wk8s
 ```
 
 Verifique que o runner aparece no link:
@@ -117,35 +111,6 @@ Links:
 
 
 
-```bash
-cd "$HOME" \
-&& git clone https://github.com/actions/actions-runner-controller.git \
-&& cd actions-runner-controller
-
-mkdir -pv ~/arc-configuration/{controller,runner-scale-set-1,runner-scale-set-2} \
-&& cd ~/arc-configuration
-
-
-cd ~/actions-runner-controller/charts \
-&& cp -v actions-runner-controller/values.yaml ~/arc-configuration/controller \
-&& cp -v gha-runner-scale-set/values.yaml ~/arc-configuration/runner-scale-set-1 \
-&& cp -v gha-runner-scale-set/values.yaml  ~/arc-configuration/runner-scale-set-2
-
-```
-
-
-```bash
-helm install arc \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    --set image.tag="0.4.0" \
-    -f ~/arc-configuration/controller/values.yaml \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-    --version "0.4.0"
-```
-
-
-
 ## DinD
 
 
@@ -153,9 +118,6 @@ Copie e cole no terminal da VM e EDITE com seu PAT gerado no passo anterior:
 ```bash
 GITHUB_PAT=ghp_yyyyyyyyyyyyyyy
 ```
-
-
-
 
 
 ```bash
@@ -167,9 +129,23 @@ cd "$HOME" \
 
 cat << 'EOF' > enables-dind.patch
 diff --git a/charts/gha-runner-scale-set/values.yaml b/charts/gha-runner-scale-set/values.yaml
-index 021fecb..b474e88 100644
+index 021fecb..4395555 100644
 --- a/charts/gha-runner-scale-set/values.yaml
 +++ b/charts/gha-runner-scale-set/values.yaml
+@@ -37,11 +37,11 @@ githubConfigSecret:
+ #     - example.org
+ 
+ ## maxRunners is the max number of runners the autoscaling runner set will scale up to.
+-# maxRunners: 5
++maxRunners: 3
+ 
+ ## minRunners is the min number of idle runners. The target number of runners created will be
+ ## calculated as a sum of minRunners and the number of jobs assigned to the scale set.
+-# minRunners: 0
++minRunners: 1
+ 
+ # runnerGroup: "default"
+ 
 @@ -75,8 +75,8 @@ githubConfigSecret:
  ##
  ## If any customization is required for dind or kubernetes mode, containerMode should remain
@@ -194,77 +170,118 @@ index 021fecb..b474e88 100644
 EOF
 
 git apply enables-dind.patch
-```
+rm -v enables-dind.patch
 
 
-```bash
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-INSTALLATION_NAME="arc-runner-set"
-NAMESPACE="arc-runners"
+
+NAMESPACE="arc-systems"
 
 helm install arc \
     --namespace "${NAMESPACE}" \
     --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-&& helm install arc-runner-set \
-    --create-namespace \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+
+
+INSTALLATION_NAME="arc-runner-set1"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
     --namespace "${NAMESPACE}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    --create-namespace \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set image.tag="0.4.0" \
-    --version "0.4.0" \
-    -f ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
-while true; do
-  kubectl get pod --all-namespaces -o wide \
-  && echo \
-  && kubectl get services --all-namespaces -o wide \
-  && echo \
-  && kubectl get deployments.apps --all-namespaces -o wide \
-  && echo \
-  && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
-  clear;
-done
-```
 
+INSTALLATION_NAME="arc-runner-set-dind"
+# NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
 
-```bash
-helm install arc-runner-set \
+helm install "${INSTALLATION_NAME}" \
     --namespace "${NAMESPACE}" \
     --create-namespace \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set image.tag="0.4.0" \
-    -f ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
-    --version "0.4.0"
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    --values ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+wk8s
 ```
 
 
+```bash
+kubectl get pods -n arc-runners
+```
 
+
+###
 
 
 
 
 ```bash
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+NAMESPACE="arc-systems"
+
+helm \
+install \
+--dry-run \
+arc \
+--namespace "${NAMESPACE}" \
+--create-namespace \
+oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+-o yaml > gha-runner-scale-set-controller.yml
+
+
 INSTALLATION_NAME="arc-runner-set"
 NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
 
-helm install arc \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-&& helm install arc-runner-set \
-    --create-namespace \
-    --namespace "${NAMESPACE}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set image.tag="0.4.0" \
-    --version "0.4.0" \
-    -f ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+helm \
+install \
+--dry-run \
+"${INSTALLATION_NAME}" \
+--namespace "${NAMESPACE}" \
+--create-namespace \
+--set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+--set githubConfigSecret.github_token="${GITHUB_PAT}" \
+oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+-o yaml > gha-runner-scale-set.yml
+
+wk8s
 ```
 
+
+
+```bash
+helm install --dry-run --debug
+
+#kubectl create namespace arc-runners
+#kubectl create secret generic pre-defined-secret \
+#--namespace=arc-runners \
+#--from-literal=github_token="${GITHUB_PAT}"
+
+
+    --set image.tag="0.4.0" \
+    --version "0.4.0" \
+```
+
+
+```bash
+cd "$HOME" \
+&& git clone https://github.com/actions/actions-runner-controller.git \
+&& cd actions-runner-controller \
+&& git checkout 1f9b7541e6545a9d5ffa052481a84aad7ba4aa4d
+
+
+mkdir -pv ~/arc-configuration/{controller,runner-scale-set-1,runner-scale-set-2} \
+&& cd ~/arc-configuration
+
+
+cd ~/actions-runner-controller/charts \
+&& cp -v actions-runner-controller/values.yaml ~/arc-configuration/controller \
+&& cp -v gha-runner-scale-set/values.yaml ~/arc-configuration/runner-scale-set-1 \
+&& cp -v gha-runner-scale-set/values.yaml  ~/arc-configuration/runner-scale-set-2
+
+```
