@@ -25,17 +25,19 @@ jobs:
 
       - name: Metadatas
         run: |
-          cat /etc/os*release
+          # cat /etc/os*release
           # cat /etc/group
           uname -a
           id
           sudo id
 
-      - name: Instala nix single user
+      - name: Testes sobre docker
         run: |
-          env | sort
+          # env | sort
           which docker
+          docker --version
           docker info
+          sudo docker info
           docker images
 
       - name: Executa instalação via apt para teste mínimo
