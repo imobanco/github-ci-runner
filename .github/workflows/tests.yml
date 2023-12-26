@@ -23,6 +23,13 @@ jobs:
       - name: Rodar um echo
         run: echo 'Olá mundo!'
 
+      - name: Instala nix single user
+        run: |
+          env | sort
+          which docker
+          docker info
+          docker images
+
       - name: Metadatas
         run: |
           cat /etc/os*release
@@ -35,8 +42,3 @@ jobs:
         run: |
            sudo apt-get update && sudo apt-get install -y hello curl xz-utils
            hello
-
-      - name: Instala nix single user
-        run: |
-          docker info
-          docker images

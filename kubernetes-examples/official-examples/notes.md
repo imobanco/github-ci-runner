@@ -86,4 +86,5 @@ kubectl apply -f static-docker-example.yml
 
 ```
 Refs.:
-- 
+- https://discuss.kubernetes.io/t/can-k8s-or-k8s-api-build-image-with-dockerfile/16059/2
+

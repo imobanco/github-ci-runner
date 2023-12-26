@@ -223,21 +223,65 @@ kubectl get pods -n arc-runners
 
 
 ```bash
+#cd "$HOME" \
+#&& git clone https://github.com/actions/actions-runner-controller.git \
+#&& cd actions-runner-controller \
+#&& git checkout 1f9b7541e6545a9d5ffa052481a84aad7ba4aa4d
+#
+#cat << 'EOF' > pin-tags-and-dind.patch
+#diff --git a/charts/gha-runner-scale-set/values.yaml b/charts/gha-runner-scale-set/values.yaml
+#index 021fecb..6bc29fe 100644
+#--- a/charts/gha-runner-scale-set/values.yaml
+#+++ b/charts/gha-runner-scale-set/values.yaml
+#@@ -75,8 +75,8 @@ githubConfigSecret:
+# ##
+# ## If any customization is required for dind or kubernetes mode, containerMode should remain
+# ## empty, and configuration should be applied to the template.
+#-# containerMode:
+#-#   type: "dind"  ## type can be set to dind or kubernetes
+#+containerMode:
+#+  type: "dind"  ## type can be set to dind or kubernetes
+# #   ## the following is required when containerMode.type=kubernetes
+# #   kubernetesModeWorkVolumeClaim:
+# #     accessModes: ["ReadWriteOnce"]
+#@@ -133,7 +133,7 @@ template:
+#   ##           mountPath: /run/docker
+#   ##           readOnly: true
+#   ##     - name: dind
+#-  ##       image: docker:dind
+#+  ##       image: docker:24.0.7-dind-alpine3.18
+#   ##       args:
+#   ##         - dockerd
+#   ##         - --host=unix:///run/docker/docker.sock
+#@@ -190,7 +190,7 @@ template:
+#   spec:
+#     containers:
+#       - name: runner
+#-        image: ghcr.io/actions/actions-runner:latest
+#+        image: ghcr.io/actions/actions-runner:2.306.0
+#         command: ["/home/runner/run.sh"]
+# 
+# ## Optional controller service account that needs to have required Role and RoleBinding
+#EOF
+#
+#git apply pin-tags-and-dind.patch
+#rm -v pin-tags-and-dind.patch
+
+
 cd "$HOME" \
 && git clone https://github.com/actions/actions-runner-controller.git \
 && cd actions-runner-controller \
-&& git checkout 1f9b7541e6545a9d5ffa052481a84aad7ba4aa4d
-
+&& git checkout e0a7e142e0fcd446c58e7875d4d44a7eea6e72f2
 
 cat << 'EOF' > pin-tags-and-dind.patch
 diff --git a/charts/gha-runner-scale-set/values.yaml b/charts/gha-runner-scale-set/values.yaml
-index 021fecb..6bc29fe 100644
+index bbd58ac..8c2db90 100644
 --- a/charts/gha-runner-scale-set/values.yaml
 +++ b/charts/gha-runner-scale-set/values.yaml
-@@ -75,8 +75,8 @@ githubConfigSecret:
- ##
- ## If any customization is required for dind or kubernetes mode, containerMode should remain
- ## empty, and configuration should be applied to the template.
+@@ -68,8 +68,8 @@ githubConfigSecret:
+ #       key: ca.crt
+ #   runnerMountPath: /usr/local/share/ca-certificates/
+ 
 -# containerMode:
 -#   type: "dind"  ## type can be set to dind or kubernetes
 +containerMode:
@@ -245,36 +289,29 @@ index 021fecb..6bc29fe 100644
  #   ## the following is required when containerMode.type=kubernetes
  #   kubernetesModeWorkVolumeClaim:
  #     accessModes: ["ReadWriteOnce"]
-@@ -133,7 +133,7 @@ template:
-   ##           mountPath: /run/docker
-   ##           readOnly: true
-   ##     - name: dind
--  ##       image: docker:dind
-+  ##       image: docker:24.0.7-dind-alpine3.18
-   ##       args:
-   ##         - dockerd
-   ##         - --host=unix:///run/docker/docker.sock
-@@ -190,7 +190,7 @@ template:
+@@ -158,7 +158,7 @@ template:
    spec:
      containers:
-       - name: runner
--        image: ghcr.io/actions/actions-runner:latest
-+        image: ghcr.io/actions/actions-runner:2.306.0
-         command: ["/home/runner/run.sh"]
+     - name: runner
+-      image: ghcr.io/actions/actions-runner:latest
++      image: ghcr.io/actions/actions-runner:2.306.0
+       command: ["/home/runner/run.sh"]
  
  ## Optional controller service account that needs to have required Role and RoleBinding
 EOF
 
-git apply pin-tags-and-dind.patch
+git pin-tags-and-dind.patch
 rm -v pin-tags-and-dind.patch
 
 
 NAMESPACE="arc-systems"
-helm install arc-1 \
+
+helm install arc \
     --namespace "${NAMESPACE}" \
     --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
-
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+    --set image.tag="0.4.0" \
+    --version "0.4.0" 
 
 INSTALLATION_NAME="arc-runner-set"
 NAMESPACE="arc-runners"
@@ -285,10 +322,24 @@ helm install "${INSTALLATION_NAME}" \
     --create-namespace \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+    --set image.tag="0.4.0" \
+    --version "0.4.0" 
+    
+INSTALLATION_NAME="arc-runner-set-dind"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     --values ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
-    --set image.tag="0.8.1" \
-    --version "0.8.1" 
+    --set image.tag="0.4.0" \
+    --version "0.4.0" 
+    
 wk8s
 ```
 
@@ -299,6 +350,8 @@ wk8s
 
 
 https://some-natalie.dev/blog/kaniko-in-arc/
+https://snyk.io/blog/building-docker-images-kubernetes/
+
 
 ```bash
 
