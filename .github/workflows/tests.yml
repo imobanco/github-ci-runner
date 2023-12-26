@@ -35,8 +35,8 @@ jobs:
         run: |
           env | sort
           which docker
-          docker info
-          docker images
+          # docker info
+          # docker images
 
       - name: Executa instalação via apt para teste mínimo
         run: |
