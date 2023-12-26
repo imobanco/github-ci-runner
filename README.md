@@ -344,7 +344,13 @@ wk8s
 ```
 
 
+```bash
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
 
+helm uninstall "${INSTALLATION_NAME}" \ 
+    --namespace "${NAMESPACE}" 
+```
 
 #### Kaniko
 
