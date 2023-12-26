@@ -37,18 +37,53 @@ kubectl apply \
 kubectl get service frontend
 ```
 
-
 ```bash
-while true; do
-  kubectl get pod --all-namespaces -o wide \
-  && echo \
-  && kubectl get services --all-namespaces -o wide \
-  && echo \
-  && kubectl get deployments.apps --all-namespaces -o wide \
-  && echo \
-  && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
-  clear;
-done
+wk8s
 ```
 
+
+
+
+```bash
+cat > static-docker-example.yml <<-'EOF'
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: static-docker-example
+spec:
+  volumes:
+  - name: dockersocket
+    emptyDir: {}
+
+  containers:
+
+    # This is going to be our docker service container.
+    - name: docker-service
+      image: docker:dind-rootless
+      
+      # IMPORTANT! This is security related.
+      # Read up about running privileged containers
+      securityContext:
+        privileged: true
+
+      volumeMounts:
+      - name: dockersocket
+        mountPath: /run/user/1000/
+
+    # We will run commands in this one.
+    - name: docker-commander
+      image: docker:dind-rootless
+      # Just keep the container running
+      command: [ "/bin/sh", "-c", "sleep 86000s" ]
+      volumeMounts:
+      - name: dockersocket
+        mountPath: /var/run
+EOF
+
+
+kubectl apply -f static-docker-example.yml
+
+```
+Refs.:
+- 

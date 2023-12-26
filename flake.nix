@@ -456,6 +456,7 @@
               environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
 
               # services.kubernetes.kubelet.seedDockerImages = [];
+              # dockerTools.examples.redis
               services.kubernetes.roles = [ "master" "node" ];
               services.kubernetes.masterAddress = "nixos";
               services.kubernetes = {

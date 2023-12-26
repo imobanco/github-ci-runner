@@ -64,17 +64,7 @@ Refs.:
 
 
 ```bash
-while true; do
-  kubectl get pod --all-namespaces -o wide \
-  && echo \
-  && kubectl get services --all-namespaces -o wide \
-  && echo \
-  && kubectl get deployments.apps --all-namespaces -o wide \
-  && echo \
-  && kubectl get nodes --all-namespaces -o wide; 
-  sleep 2;
-  clear;
-done
+wk8s
 ```
 
 Em um terminal na VM NixOS:

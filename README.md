@@ -69,8 +69,9 @@ NAMESPACE="arc-systems"
 helm install arc \
     --namespace "${NAMESPACE}" \
     --create-namespace \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
-
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+    --set image.tag="0.8.1" \
+    --version "0.8.1"
 
 INSTALLATION_NAME="arc-runner-set"
 NAMESPACE="arc-runners"
@@ -81,10 +82,14 @@ helm install "${INSTALLATION_NAME}" \
     --create-namespace \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+    --set image.tag="0.8.1" \
+    --version "0.8.1"
 wk8s
 ```
+
+
+
 
 Verifique que o runner aparece no link:
 https://github.com/imobanco/github-ci-runner/actions/runners?tab=self-hosted
@@ -173,6 +178,129 @@ git apply enables-dind.patch
 rm -v enables-dind.patch
 
 
+NAMESPACE="arc-systems"
+helm install arc --wait \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+
+#INSTALLATION_NAME="arc-runner-set1"
+#NAMESPACE="arc-runners"
+#GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+#
+#helm install "${INSTALLATION_NAME}" --wait \
+#    --namespace "${NAMESPACE}" \
+#    --create-namespace \
+#    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+#    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+#    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+
+INSTALLATION_NAME="arc-runner-set-dind"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    --values ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+    --set image.tag="0.4.0" \
+    --version "0.4.0" 
+wk8s
+```
+
+
+```bash
+kubectl get pods -n arc-systems
+kubectl get pods -n arc-runners
+```
+
+
+### Tentativa
+
+
+```bash
+cd "$HOME" \
+&& git clone https://github.com/actions/actions-runner-controller.git \
+&& cd actions-runner-controller \
+&& git checkout 1f9b7541e6545a9d5ffa052481a84aad7ba4aa4d
+
+
+cat << 'EOF' > pin-tags-and-dind.patch
+diff --git a/charts/gha-runner-scale-set/values.yaml b/charts/gha-runner-scale-set/values.yaml
+index 021fecb..6bc29fe 100644
+--- a/charts/gha-runner-scale-set/values.yaml
++++ b/charts/gha-runner-scale-set/values.yaml
+@@ -75,8 +75,8 @@ githubConfigSecret:
+ ##
+ ## If any customization is required for dind or kubernetes mode, containerMode should remain
+ ## empty, and configuration should be applied to the template.
+-# containerMode:
+-#   type: "dind"  ## type can be set to dind or kubernetes
++containerMode:
++  type: "dind"  ## type can be set to dind or kubernetes
+ #   ## the following is required when containerMode.type=kubernetes
+ #   kubernetesModeWorkVolumeClaim:
+ #     accessModes: ["ReadWriteOnce"]
+@@ -133,7 +133,7 @@ template:
+   ##           mountPath: /run/docker
+   ##           readOnly: true
+   ##     - name: dind
+-  ##       image: docker:dind
++  ##       image: docker:24.0.7-dind-alpine3.18
+   ##       args:
+   ##         - dockerd
+   ##         - --host=unix:///run/docker/docker.sock
+@@ -190,7 +190,7 @@ template:
+   spec:
+     containers:
+       - name: runner
+-        image: ghcr.io/actions/actions-runner:latest
++        image: ghcr.io/actions/actions-runner:2.306.0
+         command: ["/home/runner/run.sh"]
+ 
+ ## Optional controller service account that needs to have required Role and RoleBinding
+EOF
+
+git apply pin-tags-and-dind.patch
+rm -v pin-tags-and-dind.patch
+
+
+NAMESPACE="arc-systems"
+helm install arc-1 \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+
+
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    --values ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+    --set image.tag="0.8.1" \
+    --version "0.8.1" 
+wk8s
+```
+
+
+
+
+#### Kaniko
+
+
+https://some-natalie.dev/blog/kaniko-in-arc/
+
+```bash
 
 NAMESPACE="arc-systems"
 
@@ -182,7 +310,7 @@ helm install arc \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
 
-INSTALLATION_NAME="arc-runner-set1"
+INSTALLATION_NAME="arc-runner-set"
 NAMESPACE="arc-runners"
 GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
 
@@ -194,26 +322,92 @@ helm install "${INSTALLATION_NAME}" \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
 
-INSTALLATION_NAME="arc-runner-set-dind"
-# NAMESPACE="arc-runners"
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+cat > k8s-storage.yml << 'EOF'
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: k8s-mode
+  namespace: test-runners # just showing the test namespace
+provisioner: file.csi.azure.com # change this to your provisioner
+allowVolumeExpansion: true # probably not strictly necessary
+reclaimPolicy: Delete
+mountOptions:
+ - dir_mode=0777 # this mounts at a directory needing this
+ - file_mode=0777
+ - uid=1000 # match your pod's user id, this is for actions/actions-runner
+ - gid=1000
+ - mfsymlinks
+ - cache=strict
+ - actimeo=30
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-k8s-cache-pvc
+  namespace: test-runners
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: k8s-mode # we'll need this in the runner Helm chart
+EOF
 
-helm install "${INSTALLATION_NAME}" \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    --values ~/actions-runner-controller/charts/gha-runner-scale-set/values.yaml \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
-wk8s
+kubectl create namespace test-runners
+kubectl apply -f k8s-storage.yml
 ```
 
 
 ```bash
-kubectl get pods -n arc-runners
-```
+cat > helm-kaniko.yml << 'EOF'
+template:
+  spec:
+    initContainers: # needed to set permissions to use the PVC
+    - name: kube-init
+      image: ghcr.io/actions/actions-runner:latest
+      command: ["sudo", "chown", "-R", "runner:runner", "/home/runner/_work"]
+      volumeMounts:
+      - name: work
+        mountPath: /home/runner/_work
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        command: ["/home/runner/run.sh"]
+        env:
+          - name: ACTIONS_RUNNER_CONTAINER_HOOKS
+            value: /home/runner/k8s/index.js
+          - name: ACTIONS_RUNNER_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
+            value: "false"  # allow non-container steps, makes life easier
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
 
+containerMode:
+  type: "kubernetes" 
+  kubernetesModeWorkVolumeClaim:
+    accessModes: ["ReadWriteOnce"]
+    storageClassName: "k8s-mode"
+    resources:
+      requests:
+        storage: 1Gi
+EOF
+
+helm install kaniko-worker \
+    --namespace "test-runners" \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    -f helm-kaniko.yml \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+    --version 0.8.1
+
+kubectl get pods -n "test-runners"
+```
 
 ###
 
