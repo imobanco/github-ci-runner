@@ -356,6 +356,10 @@
               services.xserver.layout = "br";
 
               services.xserver.displayManager.autoLogin.user = "nixuser";
+              services.xserver.displayManager.sessionCommands = ''
+                exo-open --launch TerminalEmulator --zoom=-3
+                export ABC_XYZ=42
+              '';
 
               # https://nixos.org/manual/nixos/stable/#sec-xfce
               services.xserver.desktopManager.xfce.enable = true;
@@ -456,6 +460,7 @@
               environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
 
               # services.kubernetes.kubelet.seedDockerImages = [];
+              # ghcr.io/actions/actions-runner:2.311.0
               # dockerTools.examples.redis
               services.kubernetes.roles = [ "master" "node" ];
               services.kubernetes.masterAddress = "nixos";

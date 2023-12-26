@@ -14,7 +14,7 @@ on: workflow_dispatch
 
 jobs:
   test:
-    runs-on: arc-runner-set-dind
+    runs-on: arc-runner-set
     name: Testes
     steps:
       - name: checkout PR merge commit
@@ -36,8 +36,8 @@ jobs:
           # env | sort
           which docker
           docker --version
-          docker info
           sudo docker info
+          docker info
           docker images
 
       - name: Executa instalação via apt para teste mínimo
