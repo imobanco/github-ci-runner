@@ -34,7 +34,7 @@ jobs:
       - name: Testes sobre docker
         run: |
           # env | sort
-          touch /dev/kvm
+          # touch /dev/kvm
           which docker
           docker --version
           sudo docker info
