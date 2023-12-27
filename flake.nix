@@ -393,6 +393,7 @@
                 nix-direnv
                 nixos-option
                 oh-my-zsh
+                xclip
                 zsh
                 zsh-autosuggestions
                 zsh-completions
@@ -459,8 +460,19 @@
 
               environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
 
-              # services.kubernetes.kubelet.seedDockerImages = [];
-              # ghcr.io/actions/actions-runner:2.311.0
+              # services.kubernetes.kubelet.seedDockerImages = [
+              #   (pkgs.dockerTools.pullImage {
+              #     name = "ghcr.io/actions";
+              #     imageName = "actions-runner:2.311.0";
+              #     # tag = "2.311.0";
+              #     sha256 = "sha256-BVnOXiYRUg3ukjYJBYbazOfrIrzQt7aRB2LWPf1b+ZE=";
+              #     # podman inspect docker.io/sickcodes/docker-osx:latest | jq ".[].Digest"
+              #     # imageDigest = "sha256:e505724e0dbb070454912b159645932f74dda9aed03c48c463f33e270a6cbfa1";
+              #     imageDigest = "";
+              #   })
+              # ];
+              # docker pull ghcr.io/actions/actions-runner:2.311.0
+              # docker inspect docker.io/sickcodes/docker-osx:latest | jq ".[].Digest"
               # dockerTools.examples.redis
               services.kubernetes.roles = [ "master" "node" ];
               services.kubernetes.masterAddress = "nixos";
