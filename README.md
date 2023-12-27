@@ -605,16 +605,16 @@ helm install arc \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
 
-#INSTALLATION_NAME="arc-runner-set"
-#NAMESPACE="arc-runners"
-#GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-#
-#helm install "${INSTALLATION_NAME}" \
-#    --namespace "${NAMESPACE}" \
-#    --create-namespace \
-#    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-#    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-#    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
 
 cat > k8s-storage.yml << 'EOF'
@@ -652,10 +652,9 @@ EOF
 
 kubectl create namespace test-runners
 kubectl apply -f k8s-storage.yml
-```
 
 
-```bash
+
 cat > helm-kaniko.yml << 'EOF'
 template:
   spec:
@@ -703,7 +702,7 @@ helm install kaniko-worker \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
     --version 0.8.1
 
-kubectl get pods -n "arc-runner-set"
+wk8s
 ```
 
 
