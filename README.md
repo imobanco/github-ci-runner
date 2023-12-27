@@ -486,7 +486,9 @@ kubectl get pods -n arc-runners
 
 
 
-### Tentativa
+### Tentativa de reproduzir o que é feito no vídeo
+
+
 
 
 ```bash
@@ -701,6 +703,42 @@ kubectl get pods -n "test-runners"
 ```
 
 
+### Testando DinD via Docker
+
+
+```bash
+docker run --device=/dev/kvm -d -t \
+--name=action-container --rm \
+-v /var/run/docker.sock:/var/run/docker.sock \
+summerwind/actions-runner-dind:v2.308.0-ubuntu-22.04 tail -f /dev/null
+
+docker exec -it action-container /bin/bash -c 'cat /etc/os-release
+```
+
+
+```bash
+docker run --device=/dev/kvm -d -t \
+--name=action-container --rm \
+-v /var/run/docker.sock:/var/run/docker.sock \
+docker:24.0.7-dind-alpine3.18 tail -f /dev/null
+
+docker exec -it action-container /bin/sh \
+-c 'docker run -it --rm alpine cat /etc/os-release'
+```
+
+
+```bash
+docker run --device=/dev/kvm -d -t \
+--name=action-container --rm \
+-v /var/run/docker.sock:/var/run/docker.sock \
+ghcr.io/actions/actions-runner:2.311.0 tail -f /dev/null
+
+docker exec -it action-container /bin/sh \
+-c 'docker run -it --rm alpine cat /etc/os-release'
+```
+
+
+
 ### helm install --dry-run --debug
 
 
@@ -721,7 +759,7 @@ oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-cont
 ```
 
 
-Quabrado!
+Quebrado!
 ```bash
 INSTALLATION_NAME="arc-runner-set"
 NAMESPACE="arc-runners"
