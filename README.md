@@ -489,7 +489,9 @@ kubectl get pods -n arc-runners
 ### Tentativa de reproduzir o que é feito no vídeo
 
 
+[GitHub Actions: Dive into actions-runner-controller (ARC) || Advanced installation & configuration](https://www.youtube.com/watch?v=_F5ocPrv6io)
 
+> Bem complicado pinar cada coisa de modo exatamente igual!
 
 ```bash
 cd "$HOME" \
