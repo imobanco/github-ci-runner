@@ -739,6 +739,8 @@ docker exec -it action-container /bin/sh \
 -c 'docker run -it --rm alpine cat /etc/os-release'
 ```
 
+TODO: hardening e security
+https://github.com/actions/actions-runner-controller/issues/1288
 
 
 ### helm install --dry-run --debug
