@@ -708,6 +708,9 @@ kubectl get pods -n "test-runners"
 ### Testando DinD via Docker
 
 
+TODO: ajudar nessa issue?
+https://github.com/actions/actions-runner-controller/issues/2696#issuecomment-1701155470
+
 ```bash
 docker run --device=/dev/kvm -d -t \
 --name=action-container --rm \
