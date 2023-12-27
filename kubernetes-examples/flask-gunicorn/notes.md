@@ -136,3 +136,6 @@ curl 34.74.203.201:8080/
 ```
 
 Pelo que entendi não funciona externamente.
+
+
+

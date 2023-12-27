@@ -132,6 +132,7 @@ GITHUB_PAT=ghp_yyyyyyyyyyyyyyy
 
 ### O mais simples (que deveria funcionar!)
 
+https://docs.github.com/en/enterprise-server@3.10/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller#using-docker-in-docker-or-kubernetes-mode-for-containers
 
 ```bash
 cd "$HOME" \
@@ -191,7 +192,13 @@ wk8s
 
 docker:dind -> docker:24.0.7-dind-alpine3.18  
 actions-runner:latest -> actions-runner:2.311.0
-  
+
+image.dindSidecarRepositoryAndTag
+https://github.com/actions/actions-runner-controller/issues/3159#issuecomment-1857989007
+
+
+TODO: `dindSidecarRepositoryAndTag: "docker:24.0.7-dind-alpine3.18"`
+https://github.com/actions/actions-runner-controller/issues/3159#issuecomment-1860616220
 
 https://github.com/actions/actions-runner-controller/issues/3159#issuecomment-1864952928
 
@@ -280,6 +287,8 @@ kubectl -n arc-systems get pod arc-gha-rs-controller-58d944bbdb-rkdzh -o yaml
 
 
 Muda de `+  type: "dind"` para `+  type: ""`
+Ver: https://github.com/actions/actions-runner-controller/issues/3159#issuecomment-1869454029
+
 ```bash
 cd "$HOME" \
 && git clone https://github.com/actions/actions-runner-controller.git \
