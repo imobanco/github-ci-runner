@@ -605,16 +605,16 @@ helm install arc \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
 
-INSTALLATION_NAME="arc-runner-set"
-NAMESPACE="arc-runners"
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-
-helm install "${INSTALLATION_NAME}" \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+#INSTALLATION_NAME="arc-runner-set"
+#NAMESPACE="arc-runners"
+#GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+#
+#helm install "${INSTALLATION_NAME}" \
+#    --namespace "${NAMESPACE}" \
+#    --create-namespace \
+#    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+#    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+#    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
 
 cat > k8s-storage.yml << 'EOF'
@@ -659,6 +659,8 @@ kubectl apply -f k8s-storage.yml
 cat > helm-kaniko.yml << 'EOF'
 template:
   spec:
+    nodeSelector:
+      size: linux  
     initContainers: # needed to set permissions to use the PVC
     - name: kube-init
       image: ghcr.io/actions/actions-runner:latest
@@ -694,14 +696,14 @@ containerMode:
 EOF
 
 helm install kaniko-worker \
-    --namespace "test-runners" \
+    --namespace "arc-runner-set" \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     -f helm-kaniko.yml \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
     --version 0.8.1
 
-kubectl get pods -n "test-runners"
+kubectl get pods -n "arc-runner-set"
 ```
 
 
