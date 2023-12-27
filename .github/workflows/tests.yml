@@ -14,7 +14,7 @@ on: workflow_dispatch
 
 jobs:
   test:
-    runs-on: arc-runner-set
+    runs-on: kaniko-worker
     name: Testes
     steps:
       - name: checkout PR merge commit
