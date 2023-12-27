@@ -605,16 +605,16 @@ helm install arc \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
 
-INSTALLATION_NAME="arc-runner-set"
-NAMESPACE="arc-runners"
-GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
-
-helm install "${INSTALLATION_NAME}" \
-    --namespace "${NAMESPACE}" \
-    --create-namespace \
-    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+#INSTALLATION_NAME="arc-runner-set"
+#NAMESPACE="arc-runners"
+#GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+#
+#helm install "${INSTALLATION_NAME}" \
+#    --namespace "${NAMESPACE}" \
+#    --create-namespace \
+#    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+#    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+#    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
 
 cat > k8s-storage.yml << 'EOF'
@@ -623,7 +623,7 @@ apiVersion: storage.k8s.io/v1
 metadata:
   name: k8s-mode
   namespace: test-runners # just showing the test namespace
-provisioner: file.csi.azure.com # change this to your provisioner
+provisioner: kubernetes.io/example
 allowVolumeExpansion: true # probably not strictly necessary
 reclaimPolicy: Delete
 mountOptions:
@@ -654,12 +654,9 @@ kubectl create namespace test-runners
 kubectl apply -f k8s-storage.yml
 
 
-
 cat > helm-kaniko.yml << 'EOF'
 template:
   spec:
-    nodeSelector:
-      size: linux  
     initContainers: # needed to set permissions to use the PVC
     - name: kube-init
       image: ghcr.io/actions/actions-runner:latest
@@ -694,17 +691,32 @@ containerMode:
         storage: 1Gi
 EOF
 
-helm install kaniko-worker \
-    --namespace "arc-runner-set" \
+
+INSTALLATION_NAME="kaniko-worker"
+NAMESPACE="test-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
     --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
     --set githubConfigSecret.github_token="${GITHUB_PAT}" \
     -f helm-kaniko.yml \
     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
-    --version 0.8.1
+    --set image.tag="0.8.1" \
+    --version "0.8.1"
 
 wk8s
 ```
 
+
+```bash
+provisioner: kubernetes.io/example
+```
+
+```bash
+    nodeSelector:
+      kubernetes.io/hostname: nixos 
+```
 
 ### Testando DinD via Docker
 
