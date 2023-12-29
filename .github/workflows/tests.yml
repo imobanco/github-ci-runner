@@ -37,8 +37,9 @@ jobs:
       - name: Testes sobre docker
         run: |
           # env | sort
-          # touch /dev/kvm
-          # which docker
+          touch /dev/kvm
+          which docker
+          readlink -f $(which docker)
           docker --version
           # sudo docker info
           docker info
@@ -46,8 +47,8 @@ jobs:
           docker run --rm alpine cat /etc/os-release
           docker images
 
-      - name: Executa instalação via nix para teste mínimo
+      - name: Mais metadados
         run: |
-           nix profile install nixpkgs#hello nixpkgs#python3
-           hello
+           nix flake --version
+           nix flake metadata nixpkgs
            python3 -c 'import this'
