@@ -38,8 +38,8 @@ jobs:
         run: |
           # env | sort
           # touch /dev/kvm
-          which docker
-          readlink -f $(which docker)
+          # which docker
+          # readlink -f $(which docker)
           docker --version
           # sudo docker info
           docker info
