@@ -51,4 +51,3 @@ jobs:
         run: |
            nix flake --version
            nix flake metadata nixpkgs
-           python3 -c 'import this'
