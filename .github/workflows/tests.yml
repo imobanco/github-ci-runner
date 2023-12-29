@@ -36,9 +36,9 @@ jobs:
         run: |
           # env | sort
           # touch /dev/kvm
-          which docker
+          # which docker
           docker --version
-          sudo docker info
+          # sudo docker info
           docker info
           docker images
 
