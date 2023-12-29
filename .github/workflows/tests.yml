@@ -43,6 +43,8 @@ jobs:
           # sudo docker info
           docker info
           docker images
+          docker run -it --rm alpine cat /etc/os-release
+          docker images
 
       - name: Executa instalação via nix para teste mínimo
         run: |
