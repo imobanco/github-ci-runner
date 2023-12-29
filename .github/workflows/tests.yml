@@ -31,6 +31,8 @@ jobs:
           uname -a
           id
           # sudo id
+          cat $HOME/logs.txt || true
+          echo FOO-BAR > $HOME/logs.txt
 
       - name: Testes sobre docker
         run: |
@@ -42,7 +44,8 @@ jobs:
           docker info
           docker images
 
-      - name: Executa instalação via apt para teste mínimo
+      - name: Executa instalação via nix para teste mínimo
         run: |
-           sudo apt-get update && sudo apt-get install -y curl nix-bin hello xz-utils
+           nix profile install nixpkgs#hello nixpkgs#python3
            hello
+           python3 -c 'import this'
