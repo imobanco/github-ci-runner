@@ -30,7 +30,7 @@ jobs:
           # cat /etc/group
           uname -a
           id
-          sudo id
+          # sudo id
 
       - name: Testes sobre docker
         run: |
