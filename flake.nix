@@ -294,7 +294,7 @@
 
                   # TODO:
                   echo "systemctl status github-runner-nixos.service" >> "$DESTINATION"
-                  echo "github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
+                  echo "run-github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
 
                   echo "Ended"
                 '';
@@ -490,7 +490,7 @@
                     #! ${pkgs.runtimeShell} -e
                       sudo mkdir -pv -m 0700 /run/secrets/github-runner
                       sudo chown $(id -u):$(id -g) /run/secrets/github-runner
-                      echo -n ghp_yyyy > /run/secrets/github-runner/nixos.token
+                      echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
                   ''
                 )
 

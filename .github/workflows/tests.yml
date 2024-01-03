@@ -50,8 +50,8 @@ jobs:
       - name: Outros testes sobre docker
         run: |
           id
-          docker run --privileged=true --rm alpine touch /dev/kvm
-          docker images
+          docker run --privileged=true --rm \
+          alpine sh -c 'id && touch /dev/kvm && stat /dev/kvm && file /dev/kvm'
 
       - name: Mais metadados
         run: |
