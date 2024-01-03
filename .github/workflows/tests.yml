@@ -68,10 +68,12 @@ jobs:
           # env | sort
           # touch /dev/kvm
           which podman
+          which newuidmap
+          which newgidmap
           readlink -f $(which podman)
           podman --version
           podman info
-          podman images
+          # podman images
           podman run --rm alpine cat /etc/os-release
           podman images
           podman build --tag custom-python .
