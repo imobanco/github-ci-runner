@@ -281,7 +281,12 @@
               services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
-              services.github-runner.extraPackages = with pkgs; [ config.virtualisation.docker.package hello ];
+              services.github-runner.extraPackages = with pkgs; [
+                config.virtualisation.docker.package
+                hello
+                # sudo
+                python39
+              ];
               virtualisation.docker.enable = true;
               systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
               # systemd.services.github-runner."nixos".extraPackages = with pkgs; [ which sudo ];

@@ -24,8 +24,10 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
-      - name: Executa GNU hello
-        run: hello
+      - name: Executa GNU hello e python3
+        run: |
+          hello
+          python --version
 
       - name: Metadatas
         run: |
@@ -35,6 +37,8 @@ jobs:
           id
           pwd
           ls -alh
+          nproc
+          free -h
           # sudo id
           cat $HOME/logs.txt || true
           echo FOO-BAR > $HOME/logs.txt
