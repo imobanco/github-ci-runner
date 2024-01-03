@@ -70,6 +70,8 @@ jobs:
           which podman
           stat $(which newuidmap)
           stat $(which newgidmap)
+          stat $(which /run/wrappers/bin/newuidmap)
+          stat $(which /run/wrappers/bin/newgidmap)
           echo $PATH
           readlink -f $(which podman)
           podman --version

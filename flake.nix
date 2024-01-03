@@ -280,6 +280,9 @@
               services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
+              # services.github-runner.extraEnvironment = lib.mkForce {
+              #   PATH = "/run/wrappers/bin:$PATH";
+              # };
               services.github-runner.extraPackages = config.environment.systemPackages;
               #  services.github-runner.extraPackages = with pkgs; [
               #    config.virtualisation.docker.package
@@ -453,6 +456,7 @@
                 nix-direnv
                 nixos-option
                 oh-my-zsh
+                shadow
                 xclip
                 zsh
                 zsh-autosuggestions
