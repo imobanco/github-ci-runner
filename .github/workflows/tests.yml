@@ -68,8 +68,8 @@ jobs:
           # env | sort
           # touch /dev/kvm
           which podman
-          which newuidmap
-          which newgidmap
+          stat $(which newuidmap)
+          stat $(which newgidmap)
           echo $PATH
           readlink -f $(which podman)
           podman --version
