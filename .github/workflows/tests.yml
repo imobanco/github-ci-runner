@@ -36,6 +36,12 @@ jobs:
           cat $HOME/logs.txt || true
           echo FOO-BAR > $HOME/logs.txt
 
+      - name: Testes sobre docker build
+        run: |
+          id
+          docker build --tag custom-python .
+          docker images
+
       - name: Testes sobre docker
         run: |
           # env | sort
@@ -49,7 +55,7 @@ jobs:
           docker run --rm alpine cat /etc/os-release
           docker images
 
-      - name: Outros testes sobre docker
+      - name: Testes sobre /dev/kvm
         run: |
           id
           docker run --privileged=true --rm \
