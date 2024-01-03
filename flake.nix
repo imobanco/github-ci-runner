@@ -292,8 +292,9 @@
 
                   DESTINATION=/home/nixuser/.zsh_history
 
-                  # TODO:
-                  echo "systemctl status github-runner-nixos.service" >> "$DESTINATION"
+                  # TODO: https://stackoverflow.com/a/67169387
+                  echo "journalctl -xeu github-runner-nixos.service" >> "$DESTINATION"
+                  echo "systemctl status github-runner-nixos.service | cat" >> "$DESTINATION"
                   echo "run-github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
 
                   echo "Ended"
@@ -428,7 +429,7 @@
                 exo-open \
                   --launch TerminalEmulator \
                   --zoom=-3 \
-                  --geometry 154x24
+                  --geometry 154x40
               '';
 
               # https://nixos.org/manual/nixos/stable/#sec-xfce
