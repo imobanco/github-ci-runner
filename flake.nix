@@ -17,6 +17,25 @@
     , nixpkgs
     , ...
     }:
+    {
+      inherit (self) outputs;
+
+      overlays.default = final: prev: {
+        inherit self final prev;
+
+        foo-bar = prev.hello;
+
+        # https://fnordig.de/2023/07/24/old-ruby-on-modern-nix/
+        # nodejs_16 = prev.nodejs_16.meta // { insecure = false; knownVulnerabilities = []; };
+        github-runner =
+          let
+            ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
+          in
+          prev.github-runner.override {
+            nodejs_16 = prev.nodejs_16.overrideAttrs ignoringVulns;
+          };
+      };
+    } //
     allAttrs.flake-utils.lib.eachDefaultSystem
       (system:
       let
@@ -24,7 +43,10 @@
 
         pkgsAllowUnfree = import nixpkgs {
           inherit system;
-          config = { allowUnfree = true; };
+          overlays = [ self.overlays.default ];
+          config = {
+            allowUnfree = true;
+          };
         };
 
         hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
@@ -88,10 +110,10 @@
             test -d .profiles || mkdir -v .profiles
 
             test -L .profiles/dev \
-            || nix develop .# --profile .profiles/dev --command true
+            || nix develop --impure .# --profile .profiles/dev --command true
 
             test -L .profiles/dev-shell-default \
-            || nix build $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
+            || nix build --impure $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
 
             test -L .profiles/nixosConfigurations."$system".vm.config.system.build.vm \
             || nix build --impure --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
@@ -141,52 +163,42 @@
               boot.loader.systemd-boot.enable = true;
               fileSystems."/" = { device = "/dev/hda1"; };
 
-              virtualisation.vmVariant = {
+              virtualisation.vmVariant =
+                {
 
-                virtualisation.useNixStoreImage = false; # TODO: hardening
-                virtualisation.writableStore = true; # TODO: hardening
+                  virtualisation.useNixStoreImage = false; # TODO: hardening
+                  virtualisation.writableStore = true; # TODO: hardening
 
-                virtualisation.docker.enable = true;
+                  virtualisation.docker.enable = true;
 
-                programs.dconf.enable = true;
-                # security.polkit.enable = true; # TODO: hardening?
+                  programs.dconf.enable = true;
+                  # security.polkit.enable = true; # TODO: hardening?
 
-                virtualisation.memorySize = 1024 * 8; # Use MiB memory.
-                virtualisation.diskSize = 1024 * 50; # Use MiB memory.
-                virtualisation.cores = 8; # Number of cores.
-                virtualisation.graphics = true;
+                  virtualisation.memorySize = 1024 * 8; # Use MiB memory.
+                  virtualisation.diskSize = 1024 * 50; # Use MiB memory.
+                  virtualisation.cores = 8; # Number of cores.
+                  virtualisation.graphics = true;
 
-                virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
+                  virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
 
-                virtualisation.qemu.options = [
-                  # Better display option
-                  # TODO: -display sdl,gl=on
-                  # https://gitlab.com/qemu-project/qemu/-/issues/761
-                  "-vga virtio"
-                  "-display gtk,zoom-to-fit=false"
-                  # Enable copy/paste
-                  # https://www.kraxel.org/blog/2021/05/qemu-cut-paste/
-                  "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
-                  "-device virtio-serial-pci"
-                  "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
+                  virtualisation.qemu.options = [
+                    # Better display option
+                    # TODO: -display sdl,gl=on
+                    # https://gitlab.com/qemu-project/qemu/-/issues/761
+                    "-vga virtio"
+                    "-display gtk,zoom-to-fit=false"
+                    # Enable copy/paste
+                    # https://www.kraxel.org/blog/2021/05/qemu-cut-paste/
+                    "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
+                    "-device virtio-serial-pci"
+                    "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
 
-                  # https://serverfault.com/a/1119403
-                  # "-device intel-iommu,intremap=on"
+                    # https://serverfault.com/a/1119403
+                    # "-device intel-iommu,intremap=on"
 
-                  # "-net user,hostfwd=tcp::8090-::8080"
-                ];
-
-                # https://discourse.nixos.org/t/nixpkgs-support-for-linux-builders-running-on-macos/24313/2
-                virtualisation.forwardPorts = [
-                  {
-                    from = "host";
-                    # host.address = "127.0.0.1";
-                    host.port = 8090;
-                    # guest.address = "34.74.203.201";
-                    guest.port = 30163;
-                  }
-                ];
-              };
+                    # "-net user,hostfwd=tcp::8090-::8080"
+                  ];
+                };
 
               users.users.root = {
                 password = "root";
@@ -236,6 +248,7 @@
                   openssl
                   starship
                   which
+                  foo-bar
 
                 ];
                 shell = pkgs.zsh;
@@ -250,6 +263,61 @@
                   "${toString nixuserKeys}"
                 ];
               };
+
+              /*
+                https://github.com/NixOS/nixpkgs/issues/169812
+                https://github.com/actions/runner/issues/1882#issuecomment-1427930611
+                nix shell nixpkgs#github-runner --command \
+                sh \
+                -c \
+                'config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh'
+                config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh
+                TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
+              */
+              services.github-runner.enable = true;
+              services.github-runner.ephemeral = true;
+              services.github-runner.user = "nixuser";
+              # services.github-runner.runnerGroup = "nixgroup";
+              services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
+              # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
+              services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
+              services.github-runner.extraPackages = with pkgs; [ config.virtualisation.docker.package ];
+              virtualisation.docker.enable = true;
+              systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
+              # systemd.services.github-runner."nixos".extraPackages = with pkgs; [ which sudo ];
+
+              systemd.user.services.populate-history-vagrant = {
+                script = ''
+                  echo "Started"
+
+                  DESTINATION=/home/nixuser/.zsh_history
+
+                  # TODO:
+                  echo "systemctl status github-runner-nixos.service" >> "$DESTINATION"
+                  echo "github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
+
+                  echo "Ended"
+                '';
+                wantedBy = [ "default.target" ];
+              };
+
+              /*
+              https://github.com/vimjoyer/sops-nix-video/tree/25e5698044e60841a14dcd64955da0b1b66957a2
+              https://github.com/Mic92/sops-nix/issues/65#issuecomment-929082304
+              https://discourse.nixos.org/t/qmenu-secrets-sops-and-nixos/13621/8
+              https://www.youtube.com/watch?v=1BquzE3Yb4I
+              https://github.com/FiloSottile/age#encrypting-to-a-github-user
+              https://devops.datenkollektiv.de/using-sops-with-age-and-git-like-a-pro.html
+              sudo cat /run/secrets/example-key
+              */
+              /*
+              sops.defaultSopsFile = ./secrets/secrets.yaml.encrypted;
+              sops.defaultSopsFormat = "yaml";
+              sops.gnupg.sshKeyPaths = [];
+              sops.age.sshKeyPaths = [];
+              sops.age.keyFile = ./secrets/keys.txt;
+              sops.secrets.example-key = { };
+              */
 
               # https://github.com/NixOS/nixpkgs/blob/3a44e0112836b777b176870bb44155a2c1dbc226/nixos/modules/programs/zsh/oh-my-zsh.nix#L119
               # https://discourse.nixos.org/t/nix-completions-for-zsh/5532
@@ -357,8 +425,10 @@
 
               services.xserver.displayManager.autoLogin.user = "nixuser";
               services.xserver.displayManager.sessionCommands = ''
-                exo-open --launch TerminalEmulator --zoom=-3
-                export ABC_XYZ=42
+                exo-open \
+                  --launch TerminalEmulator \
+                  --zoom=-3 \
+                  --geometry 154x24
               '';
 
               # https://nixos.org/manual/nixos/stable/#sec-xfce
@@ -370,7 +440,7 @@
               # For copy/paste to work
               services.spice-vdagentd.enable = true;
 
-              nixpkgs.config.allowUnfree = true;
+              # nixpkgs.config.allowUnfree = true;
 
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
@@ -397,6 +467,8 @@
                 zsh
                 zsh-autosuggestions
                 zsh-completions
+                firefox
+                which
 
                 # Looks like kubernetes needs at least all this
                 kubectl
@@ -412,6 +484,15 @@
                 flannel
                 iptables
                 socat
+
+                (
+                  writeScriptBin "run-github-runner" ''
+                    #! ${pkgs.runtimeShell} -e
+                      sudo mkdir -pv -m 0700 /run/secrets/github-runner
+                      sudo chown $(id -u):$(id -g) /run/secrets/github-runner
+                      echo -n ghp_yyyy > /run/secrets/github-runner/nixos.token
+                  ''
+                )
 
                 (
                   writeScriptBin "fix-k8s-cluster-admin-key" ''
@@ -530,10 +611,32 @@
                 wantedBy = [ "multi-user.target" ];
               };
 
+              # journalctl --user --unit create-custom-desktop-icons.service -b -f
+              systemd.user.services.create-custom-desktop-icons = {
+                script = ''
+                  #! ${pkgs.runtimeShell} -e
+
+                  echo "Started"
+
+                  ln \
+                    -sfv \
+                    "${pkgs.xfce.xfce4-settings}"/share/applications/xfce4-terminal-emulator.desktop \
+                    /home/nixuser/Desktop/xfce4-terminal-emulator.desktop
+
+                  ln \
+                    -sfv \
+                    "${pkgs.firefox}"/share/applications/firefox.desktop \
+                    /home/nixuser/Desktop/firefox.desktop
+
+                  echo "Ended"
+                '';
+                wantedBy = [ "xfce4-notifyd.service" ];
+              };
+
               # https://discourse.nixos.org/t/nixos-firewall-with-kubernetes/23673/2
               # networking.firewall.trustedInterfaces ??
               # networking.firewall.allowedTCPPorts = [ 80 8000 8080 8443 9000 9443 ];
-              networking.firewall.enable = false;
+              networking.firewall.enable = false; # TODO: hardening
 
               environment.etc."containers/registries.conf" = {
                 mode = "0644";
@@ -555,7 +658,10 @@
               system.stateVersion = "22.11";
             })
 
+          { nixpkgs.overlays = [ self.overlays.default ]; }
+
         ];
+
         specialArgs = { inherit nixpkgs allAttrs; };
 
       };

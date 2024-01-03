@@ -119,7 +119,7 @@ Links:
 - https://docs.github.com/en/enterprise-server@3.11/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/using-actions-runner-controller-runners-in-a-workflow#about-using-arc-runners-in-a-workflow-file
 - https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/about-actions-runner-controller#assets-and-releases
 - https://github.com/actions/runner/blob/9e3e57ff90c089641a3a5833c2211841da1a37f8/images/Dockerfile 
-
+- https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/removing-self-hosted-runners
 
 ## DinD
 
@@ -363,7 +363,7 @@ wk8s
 
 
 
-#### Expação do template manualmente
+#### Expanção do template manualmente
 
 
 TODO: WIP
@@ -476,13 +476,107 @@ wk8s
 ```
 Refs.:
 - https://docs.github.com/en/enterprise-server@3.11/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller#using-docker-in-docker-mode
-- 
+
+
 
 ```bash
 kubectl get pods -n arc-systems
 kubectl get pods -n arc-runners
 ```
 
+### kubectl apply -f dind.yml
+
+
+```bash
+NAMESPACE="arc-systems"
+
+helm install arc \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+    --set image.tag="0.8.1" \
+    --version "0.8.1"
+
+INSTALLATION_NAME="arc-runner-set"
+NAMESPACE="arc-runners"
+GITHUB_CONFIG_URL="https://github.com/Imobanco/github-ci-runner"
+
+helm install "${INSTALLATION_NAME}" \
+    --namespace "${NAMESPACE}" \
+    --create-namespace \
+    --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
+    --set githubConfigSecret.github_token="${GITHUB_PAT}" \
+    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+    --set image.tag="0.8.1" \
+    --version "0.8.1"
+wk8s
+```
+
+TODO: acho que o problema foi o tipo de entidade que fiz o `-o yaml`
+
+```bash
+cat << 'EOF' > dind.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: arc-gha-rs-controller-58d944bbdb-kn77b
+spec:
+  initContainers:
+  - name: init-dind-externals
+    image: ghcr.io/actions/actions-runner:2.311.0
+    command: ["cp", "-r", "-v", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+    volumeMounts:
+      - name: dind-externals
+        mountPath: /home/runner/tmpDir
+  containers:
+  - name: runner
+    image: ghcr.io/actions/actions-runner:2.311.0
+    command: ["/home/runner/run.sh"]
+    env:
+      - name: DOCKER_HOST
+        value: unix:///var/run/docker.sock
+    volumeMounts:
+      - name: work
+        mountPath: /home/runner/_work
+      - name: dind-sock
+        mountPath: /var/run
+        readOnly: true
+  - name: dind
+    image: docker:24.0.7-dind-alpine3.18
+    args:
+      - dockerd
+      - --host=unix:///var/run/docker.sock
+      - --group=$(DOCKER_GROUP_GID)
+    env:
+      - name: DOCKER_GROUP_GID
+        value: "123"
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: work
+        mountPath: /home/runner/_work
+      - name: dind-sock
+        mountPath: /var/run
+      - name: dind-externals
+        mountPath: /home/runner/externals
+  volumes:
+  - name: work
+    emptyDir: {}
+  - name: dind-sock
+    emptyDir: {}
+  - name: dind-externals
+    emptyDir: {}
+EOF
+
+kubectl apply -f dind.yml
+```
+
+
+```bash
+github runner is invalid: 
+spec.containers[1].securityContext.privileged: 
+Forbidden: disallowed by cluster policy
+```
 
 
 
@@ -595,6 +689,9 @@ wk8s
 https://some-natalie.dev/blog/kaniko-in-arc/
 https://snyk.io/blog/building-docker-images-kubernetes/
 
+Modifiquei adicionando o PersistentVolume. Excelentes explicações:
+https://stackoverflow.com/a/74372350
+https://stackoverflow.com/a/44891419
 
 ```bash
 NAMESPACE="arc-systems"
@@ -623,7 +720,7 @@ apiVersion: storage.k8s.io/v1
 metadata:
   name: k8s-mode
   namespace: test-runners # just showing the test namespace
-provisioner: kubernetes.io/example
+provisioner: file.csi.azure.com
 allowVolumeExpansion: true # probably not strictly necessary
 reclaimPolicy: Delete
 mountOptions:
@@ -634,6 +731,21 @@ mountOptions:
  - mfsymlinks
  - cache=strict
  - actimeo=30
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: "k8s-mode"
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/runner/_work"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -647,6 +759,7 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: k8s-mode # we'll need this in the runner Helm chart
+
 EOF
 
 
