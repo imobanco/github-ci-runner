@@ -47,6 +47,12 @@ jobs:
           docker run --rm alpine cat /etc/os-release
           docker images
 
+      - name: Outros testes sobre docker
+        run: |
+          id
+          docker run --privileged=true --rm alpine touch /dev/kvm
+          docker images
+
       - name: Mais metadados
         run: |
            nix flake --version
