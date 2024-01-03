@@ -24,6 +24,9 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
+      - name: Executa GNU hello
+        run: hello
+
       - name: Metadatas
         run: |
           # cat /etc/os*release
