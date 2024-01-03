@@ -1,37 +1,89 @@
 name: tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branchs:
-      - 'feature/**'
-      - 'fix/**'
-      - 'refactor/**'
+on: workflow_dispatch
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branchs:
+#       - 'feature/**'
+#       - 'fix/**'
+#       - 'refactor/**'
 
 
 jobs:
   test:
+    # runs-on: arc-runner-set
     runs-on: self-hosted
     name: Testes
     steps:
       - name: checkout PR merge commit
         uses: actions/checkout@v3
 
-      - name: Rodar um echo
-        run: echo 'teste'
+      - name: Executa um echo
+        run: echo 'Olá mundo!'
 
-      - name: Executa docker do host
+      - name: Executa GNU hello e python3
         run: |
-          # sudo apt-get install -y podman
-          docker pull alpine
-          docker images
-          docker info
+          hello
+          python --version
 
-      - name: Run alpine OCI image with docker and metadatas
+      - name: Metadatas
         run: |
-          docker run alpine cat /etc/os*release
-          cat /etc/os*release
+          # cat /etc/os*release
+          # cat /etc/group
           uname -a
-          nix flake metadata nixpkgs
+          id
+          pwd
+          ls -alh
+          nproc
+          free -h
+          # sudo id
+          cat $HOME/logs.txt || true
+          echo FOO-BAR > $HOME/logs.txt
+
+      - name: Testes sobre docker
+        run: |
+          # env | sort
+          # touch /dev/kvm
+          which docker
+          readlink -f $(which docker)
+          docker --version
+          docker info
+          docker images
+          docker run --rm alpine cat /etc/os-release
+          docker images
+          docker build --tag custom-python .
+          docker images
+
+      - name: Testes sobre /dev/kvm
+        run: |
+          id
+          docker run --privileged=true --rm \
+          alpine sh -c 'id && touch /dev/kvm && stat /dev/kvm'
+
+      - name: Testes sobre podman
+        run: |
+          # env | sort
+          # touch /dev/kvm
+          which podman
+          readlink -f $(which podman)
+          podman --version
+          podman info
+          podman images
+          podman run --rm alpine cat /etc/os-release
+          podman images
+          podman build --tag custom-python .
+          podman images
+
+      - name: Testes sobre /dev/kvm
+        run: |
+          id
+          podman run --privileged=true --rm \
+          alpine sh -c 'id && touch /dev/kvm && stat /dev/kvm'
+
+      - name: Mais metadados
+        run: |
+           nix flake --version
+           nix flake metadata nixpkgs

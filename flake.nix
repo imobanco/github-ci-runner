@@ -17,6 +17,25 @@
     , nixpkgs
     , ...
     }:
+    {
+      inherit (self) outputs;
+
+      overlays.default = final: prev: {
+        inherit self final prev;
+
+        foo-bar = prev.hello;
+
+        # https://fnordig.de/2023/07/24/old-ruby-on-modern-nix/
+        # nodejs_16 = prev.nodejs_16.meta // { insecure = false; knownVulnerabilities = []; };
+        github-runner =
+          let
+            ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
+          in
+          prev.github-runner.override {
+            nodejs_16 = prev.nodejs_16.overrideAttrs ignoringVulns;
+          };
+      };
+    } //
     allAttrs.flake-utils.lib.eachDefaultSystem
       (system:
       let
@@ -24,7 +43,10 @@
 
         pkgsAllowUnfree = import nixpkgs {
           inherit system;
-          config = { allowUnfree = true; };
+          overlays = [ self.overlays.default ];
+          config = {
+            allowUnfree = true;
+          };
         };
 
         hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
@@ -68,6 +90,7 @@
             coreutils
             curl
             gettext
+            gh
             gnumake
             hack
             httpie
@@ -93,7 +116,7 @@
             || nix build $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
 
             test -L .profiles/nixosConfigurations."$system".vm.config.system.build.vm \
-            || nix build --impure --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
+            || nix build --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
 
             # For SOPS
             # test -d ~/.config/sops/age || mkdir -pv ~/.config/sops/age
@@ -117,7 +140,9 @@
         system = builtins.currentSystem;
 
         modules = [
-
+          # export QEMU_NET_OPTS="hostfwd=tcp::2200-:10022" && nix run .#vm
+          # Then connect with ssh -p 2200 nixuser@localhost
+          # ps -p $(pgrep -f qemu-kvm) -o args | tr ' ' '\n'
           ({ config, nixpkgs, pkgs, lib, modulesPath, ... }:
             let
               nixuserKeys = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExR+PSB/jBwJYKfpLN+MMXs3miRn70oELTV3sXdgzpr";
@@ -128,6 +153,9 @@
               # i18n.defaultLocale = "pt_BR.UTF-8";
               console.keyMap = "br-abnt2";
 
+              # Set your time zone.
+              time.timeZone = "America/Recife";
+
               # Why
               # nix flake show --impure .#
               # break if it does not exists?
@@ -135,33 +163,42 @@
               boot.loader.systemd-boot.enable = true;
               fileSystems."/" = { device = "/dev/hda1"; };
 
-              virtualisation.vmVariant = {
-                virtualisation.useNixStoreImage = false; # TODO: hardening
-                virtualisation.writableStore = true; # TODO: hardening
+              virtualisation.vmVariant =
+                {
 
-                programs.dconf.enable = true;
-                # security.polkit.enable = true; # TODO: hardening?
+                  virtualisation.useNixStoreImage = false; # TODO: hardening
+                  virtualisation.writableStore = true; # TODO: hardening
 
-                virtualisation.memorySize = 1024 * 2; # Use MiB memory.
-                virtualisation.diskSize = 1024 * 16; # Use MiB memory.
-                virtualisation.cores = 8; # Number of cores.
-                virtualisation.graphics = true;
+                  virtualisation.docker.enable = true;
 
-                virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
+                  programs.dconf.enable = true;
+                  # security.polkit.enable = true; # TODO: hardening?
 
-                virtualisation.qemu.options = [
-                  # Better display option
-                  # TODO: -display sdl,gl=on
-                  # https://gitlab.com/qemu-project/qemu/-/issues/761
-                  "-vga virtio"
-                  "-display gtk,zoom-to-fit=false"
-                  # Enable copy/paste
-                  # https://www.kraxel.org/blog/2021/05/qemu-cut-paste/
-                  "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
-                  "-device virtio-serial-pci"
-                  "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
-                ];
-              };
+                  virtualisation.memorySize = 1024 * 8; # Use MiB memory.
+                  virtualisation.diskSize = 1024 * 50; # Use MiB memory.
+                  virtualisation.cores = 8; # Number of cores.
+                  virtualisation.graphics = true;
+
+                  virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
+
+                  virtualisation.qemu.options = [
+                    # Better display option
+                    # TODO: -display sdl,gl=on
+                    # https://gitlab.com/qemu-project/qemu/-/issues/761
+                    "-vga virtio"
+                    "-display gtk,zoom-to-fit=false"
+                    # Enable copy/paste
+                    # https://www.kraxel.org/blog/2021/05/qemu-cut-paste/
+                    "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
+                    "-device virtio-serial-pci"
+                    "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
+
+                    # https://serverfault.com/a/1119403
+                    # "-device intel-iommu,intremap=on"
+
+                    # "-net user,hostfwd=tcp::8090-::8080"
+                  ];
+                };
 
               users.users.root = {
                 password = "root";
@@ -196,44 +233,23 @@
                 ];
                 packages = with pkgs; [
                   awscli
+                  bashInteractive
                   btop
                   coreutils
                   direnv
                   file
+                  firefox
+                  gh
                   git
                   gnumake
+                  nix-info
                   openssh
+                  openssl
                   starship
                   which
-
-                  sops
-
-                  github-runner
-                  curl
-                  jq
-                  httpie
-
-                  (
-                    writeScriptBin "start-github-runner-with-pat" ''
-                      #! ${pkgs.runtimeShell} -e
-
-                      PAT="$1"
-
-                      # https://github.com/actions/runner/issues/323#issuecomment-583640437
-                      # https://github.com/actions/runner/issues/2538#issuecomment-1517988404
-                      config.sh \
-                      --ephemeral \
-                      --pat "$PAT" \
-                      --replace \
-                      --runasservice \
-                      --unattended \
-                      --url https://github.com/imobanco/github-ci-runner \
-                      && run.sh
-                    ''
-                  )
+                  foo-bar
 
                 ];
-
                 shell = pkgs.zsh;
                 uid = 1234;
                 autoSubUidGidRange = true;
@@ -247,28 +263,51 @@
                 ];
               };
 
-              # imports = [ allAttrs.sops-nix.nixosModules.sops ];
               /*
                 https://github.com/NixOS/nixpkgs/issues/169812
                 https://github.com/actions/runner/issues/1882#issuecomment-1427930611
-
                 nix shell nixpkgs#github-runner --command \
                 sh \
                 -c \
                 'config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh'
-
                 config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh
-
                 TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
-                */
-              # services.github-runner.enable = true;
-              # services.github-runner.url = "https://github.com/imobanco";
+              */
+              services.github-runner.enable = true;
+              services.github-runner.ephemeral = true;
+              services.github-runner.user = "nixuser";
+              # services.github-runner.runnerGroup = "nixgroup";
+              services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
-              # services.github-runner.extraPackages = with pkgs; [ config.virtualisation.docker.package ];
-              # virtualisation.docker.enable = true;
-              # systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
-
+              services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
+              services.github-runner.extraPackages = config.environment.systemPackages;
+              #  services.github-runner.extraPackages = with pkgs; [
+              #    config.virtualisation.docker.package
+              #    hello
+              #    # sudo
+              #    procps
+              #    python39
+              #  ];
               virtualisation.docker.enable = true;
+              virtualisation.podman.enable = true;
+              systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
+
+              systemd.user.services.populate-history-vagrant = {
+                script = ''
+                  echo "Started"
+
+                  DESTINATION=/home/nixuser/.zsh_history
+
+                  # TODO: https://stackoverflow.com/a/67169387
+                  echo "journalctl -xeu github-runner-nixos.service" >> "$DESTINATION"
+                  echo "systemctl status github-runner-nixos.service | cat" >> "$DESTINATION"
+                  echo "run-github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
+
+                  echo "Ended"
+                '';
+                wantedBy = [ "default.target" ];
+              };
+
               /*
               https://github.com/vimjoyer/sops-nix-video/tree/25e5698044e60841a14dcd64955da0b1b66957a2
               https://github.com/Mic92/sops-nix/issues/65#issuecomment-929082304
@@ -276,7 +315,6 @@
               https://www.youtube.com/watch?v=1BquzE3Yb4I
               https://github.com/FiloSottile/age#encrypting-to-a-github-user
               https://devops.datenkollektiv.de/using-sops-with-age-and-git-like-a-pro.html
-
               sudo cat /run/secrets/example-key
               */
               /*
@@ -288,8 +326,14 @@
               sops.secrets.example-key = { };
               */
 
+              # https://github.com/NixOS/nixpkgs/blob/3a44e0112836b777b176870bb44155a2c1dbc226/nixos/modules/programs/zsh/oh-my-zsh.nix#L119
+              # https://discourse.nixos.org/t/nix-completions-for-zsh/5532
+              # https://github.com/NixOS/nixpkgs/blob/09aa1b23bb5f04dfc0ac306a379a464584fc8de7/nixos/modules/programs/zsh/zsh.nix#L230-L231
               programs.zsh = {
                 enable = true;
+                shellAliases = {
+                  vim = "nvim";
+                };
                 enableCompletion = true;
                 autosuggestions.enable = true;
                 syntaxHighlighting.enable = true;
@@ -332,6 +376,16 @@
                 enableGhostscriptFonts = true;
               };
 
+              # Hack to fix annoying zsh warning, too overkill probably
+              # https://www.reddit.com/r/NixOS/comments/cg102t/how_to_run_a_shell_command_upon_startup/eudvtz1/?utm_source=reddit&utm_medium=web2x&context=3
+              # https://stackoverflow.com/questions/638975/how-wdo-i-tell-if-a-regular-file-does-not-exist-in-bash#comment25226870_638985
+              systemd.user.services.fix-zsh-warning = {
+                script = ''
+                  test -f /home/nixuser/.zshrc || touch /home/nixuser/.zshrc && chown nixuser: -Rv /home/nixuser
+                '';
+                wantedBy = [ "default.target" ];
+              };
+
               # Enable ssh
               services.sshd.enable = true;
 
@@ -349,26 +403,23 @@
                 ];
               };
 
-              # Hack to fix annoying zsh warning, too overkill probably
-              # https://www.reddit.com/r/NixOS/comments/cg102t/how_to_run_a_shell_command_upon_startup/eudvtz1/?utm_source=reddit&utm_medium=web2x&context=3
-              systemd.user.services.fix-zsh-warning = {
-                script = ''
-                  echo "Fixing a zsh warning"
-                  # https://stackoverflow.com/questions/638975/how-wdo-i-tell-if-a-regular-file-does-not-exist-in-bash#comment25226870_638985
-                  test -f /home/nixuser/.zshrc || touch /home/nixuser/.zshrc && chown nixuser: -Rv /home/nixuser
-                '';
-                wantedBy = [ "default.target" ];
-              };
-
               # https://nixos.wiki/wiki/Libvirt
               # https://discourse.nixos.org/t/set-up-vagrant-with-libvirt-qemu-kvm-on-nixos/14653
               boot.extraModprobeConfig = "options kvm_intel nested=1";
+
+              services.qemuGuest.enable = true;
 
               # X configuration
               services.xserver.enable = true;
               services.xserver.layout = "br";
 
               services.xserver.displayManager.autoLogin.user = "nixuser";
+              services.xserver.displayManager.sessionCommands = ''
+                exo-open \
+                  --launch TerminalEmulator \
+                  --zoom=-3 \
+                  --geometry 154x40
+              '';
 
               # https://nixos.org/manual/nixos/stable/#sec-xfce
               services.xserver.desktopManager.xfce.enable = true;
@@ -379,41 +430,80 @@
               # For copy/paste to work
               services.spice-vdagentd.enable = true;
 
-              nixpkgs.config.allowUnfree = true;
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
                 package = pkgs.nixVersions.nix_2_10;
                 readOnlyStore = true;
                 registry.nixpkgs.flake = nixpkgs; # https://bou.ke/blog/nix-tips/
-
-                nixPath = [
-                  "nixpkgs=/etc/channels/nixpkgs"
-                  "nixos-config=/etc/nixos/configuration.nix"
-                ];
+                nixPath = [ "nixpkgs=${pkgs.path}" ];
               };
 
-              environment.etc."channels/nixpkgs".source = nixpkgs.outPath;
+              environment.etc."channels/nixpkgs".source = "${pkgs.path}";
 
               environment.systemPackages = with pkgs; [
                 bashInteractive
                 openssh
 
                 direnv
-                nix-direnv
                 fzf
+                jq
+                hello
+                python3
                 neovim
+                nix-direnv
                 nixos-option
                 oh-my-zsh
+                xclip
                 zsh
                 zsh-autosuggestions
                 zsh-completions
+                firefox
+                which
 
+                (
+                  writeScriptBin "run-github-runner" ''
+                    #! ${pkgs.runtimeShell} -e
+                      sudo mkdir -pv -m 0700 /run/secrets/github-runner
+                      sudo chown $(id -u):$(id -g) /run/secrets/github-runner
+                      echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
+                  ''
+                )
               ];
+
+              # journalctl --user --unit create-custom-desktop-icons.service -b -f
+              systemd.user.services.create-custom-desktop-icons = {
+                script = ''
+                  #! ${pkgs.runtimeShell} -e
+
+                  echo "Started"
+
+                  ln \
+                    -sfv \
+                    "${pkgs.xfce.xfce4-settings}"/share/applications/xfce4-terminal-emulator.desktop \
+                    /home/nixuser/Desktop/xfce4-terminal-emulator.desktop
+
+                  ln \
+                    -sfv \
+                    "${pkgs.firefox}"/share/applications/firefox.desktop \
+                    /home/nixuser/Desktop/firefox.desktop
+
+                  echo "Ended"
+                '';
+                wantedBy = [ "xfce4-notifyd.service" ];
+              };
+
+              # https://discourse.nixos.org/t/nixos-firewall-with-kubernetes/23673/2
+              # networking.firewall.trustedInterfaces ??
+              # networking.firewall.allowedTCPPorts = [ 80 8000 8080 8443 9000 9443 ];
+              networking.firewall.enable = true; # TODO: hardening
 
               system.stateVersion = "22.11";
             })
 
+          { nixpkgs.overlays = [ self.overlays.default ]; }
+
         ];
+
         specialArgs = { inherit nixpkgs allAttrs; };
 
       };
