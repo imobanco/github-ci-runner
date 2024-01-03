@@ -285,6 +285,7 @@
                 config.virtualisation.docker.package
                 hello
                 # sudo
+                procps
                 python39
               ];
               virtualisation.docker.enable = true;
