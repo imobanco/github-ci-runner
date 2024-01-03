@@ -21,7 +21,7 @@ jobs:
       - name: checkout PR merge commit
         uses: actions/checkout@v3
 
-      - name: Rodar um echo
+      - name: Executa um echo
         run: echo 'Olá mundo!'
 
       - name: Metadatas
@@ -30,6 +30,8 @@ jobs:
           # cat /etc/group
           uname -a
           id
+          pwd
+          ls -alh
           # sudo id
           cat $HOME/logs.txt || true
           echo FOO-BAR > $HOME/logs.txt
