@@ -70,6 +70,7 @@ jobs:
           which podman
           which newuidmap
           which newgidmap
+          echo $PATH
           readlink -f $(which podman)
           podman --version
           podman info
