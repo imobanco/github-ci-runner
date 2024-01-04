@@ -65,7 +65,7 @@ jobs:
           echo 
           docker \
           exec \
-          -it \
+          -t \
           action-container \
           /bin/sh \
           -c \
