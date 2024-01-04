@@ -25,12 +25,6 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
-      - name: Mais metadados
-        run: |
-          nix build --no-link --print-out-paths nixpkgs#dockerTools.examples.redis
-          nix build --no-link --print-out-paths --rebuild nixpkgs#dockerTools.examples.redis
-
-
       - name: Testes de esforço
         run: |
           docker \
@@ -121,24 +115,12 @@ jobs:
           --rm \
           quay.io/podman/stable \
           podman run quay.io/podman/hello
-          echo
-          docker \
-          run \
-          --privileged=true \
-          --rm \
-          quay.io/podman/stable \
-          podman run --rm almalinux \
-          bash \
-          -c \
-          '
-          yum repolist \
-          && yum -y install epel-release \
-          && yum -y install pandoc which \
-          && pandoc --version \
-          && ldd $(which pandoc)
-          '
 
       - name: Mais metadados
         run: |
            nix flake --version
            nix flake metadata nixpkgs
+           echo
+           nix build --no-link --print-out-paths nixpkgs#dockerTools.examples.redis
+           echo
+           nix build --no-link --print-out-paths --rebuild nixpkgs#dockerTools.examples.redis
