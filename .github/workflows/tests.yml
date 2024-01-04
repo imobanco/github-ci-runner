@@ -31,7 +31,7 @@ jobs:
 
       - name: Metadatas
         run: |
-          # cat /etc/os*release
+          cat /etc/os*release
           # cat /etc/group
           uname -a
           id
@@ -39,7 +39,7 @@ jobs:
           ls -alh
           nproc
           free -h
-          # sudo id
+          sudo id
           cat $HOME/logs.txt || true
           echo FOO-BAR > $HOME/logs.txt
 
@@ -63,30 +63,25 @@ jobs:
           docker run --privileged=true --rm \
           alpine sh -c 'id && touch /dev/kvm && stat /dev/kvm'
 
-      - name: Testes sobre podman
+      - name: Testes sobre DinD
         run: |
-          # env | sort
-          # touch /dev/kvm
-          which podman
-          stat $(which newuidmap)
-          stat $(which newgidmap)
-          stat $(which /run/wrappers/bin/newuidmap)
-          stat $(which /run/wrappers/bin/newgidmap)
-          echo $PATH
-          readlink -f $(which podman)
-          podman --version
-          podman info
-          # podman images
-          podman run --rm alpine cat /etc/os-release
-          podman images
-          podman build --tag custom-python .
-          podman images
-
-      - name: Testes sobre /dev/kvm
-        run: |
-          id
-          podman run --privileged=true --rm \
-          alpine sh -c 'id && touch /dev/kvm && stat /dev/kvm'
+          docker \
+          run \
+          --device=/dev/kvm \
+          -d \
+          -t \
+          --name=action-container --rm \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          docker:24.0.7-dind-alpine3.18 \
+          tail -f /dev/null
+          echo 
+          docker \
+          exec \
+          -it \
+          action-container \
+          /bin/sh \
+          -c \
+          'docker run -it --rm alpine cat /etc/os-release'
 
       - name: Mais metadados
         run: |

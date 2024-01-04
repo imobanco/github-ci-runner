@@ -280,10 +280,11 @@
               services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
-              # services.github-runner.extraEnvironment = lib.mkForce {
-              #   PATH = "/run/wrappers/bin:$PATH";
-              # };
+              # services.github-runner.extraEnvironment = ["/run/wrappers/bin"];
+
               services.github-runner.extraPackages = config.environment.systemPackages;
+              # security.wrappers.newuidmap security.wrappers.newuidmap
+              # services.github-runner.Environment = [ "PATH=/run/wrappers/bin:$PATH" ];
               #  services.github-runner.extraPackages = with pkgs; [
               #    config.virtualisation.docker.package
               #    hello
@@ -292,8 +293,26 @@
               #    python39
               #  ];
               virtualisation.docker.enable = true;
-              virtualisation.podman.enable = true;
-              systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
+
+              /*
+                TODO: apenas na unidades do systemd,
+                  na VM o podman funciona!
+
+                stat $(which newuidmap)
+                stat $(which newgidmap)
+                stat $(which /run/wrappers/bin/newuidmap)
+                stat $(which /run/wrappers/bin/newgidmap)
+
+                Relacionado?
+
+                cannot clone: Operation not permitted
+                Error: cannot re-exec process
+                Error: Process completed with exit code 125.
+                https://github.com/imobanco/github-ci-runner/actions/runs/7410557206/job/20163140291#step:8:56
+              */
+              virtualisation.podman.enable = false;
+
+              systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" "podman" ];
 
               systemd.user.services.populate-history-vagrant = {
                 script = ''
@@ -389,7 +408,6 @@
                 wantedBy = [ "default.target" ];
               };
 
-              # Enable ssh
               services.sshd.enable = true;
 
               # https://github.com/NixOS/nixpkgs/issues/21332#issuecomment-268730694
@@ -451,6 +469,7 @@
                 fzf
                 jq
                 hello
+                # podman
                 python3
                 neovim
                 nix-direnv
@@ -496,9 +515,6 @@
                 wantedBy = [ "xfce4-notifyd.service" ];
               };
 
-              # https://discourse.nixos.org/t/nixos-firewall-with-kubernetes/23673/2
-              # networking.firewall.trustedInterfaces ??
-              # networking.firewall.allowedTCPPorts = [ 80 8000 8080 8443 9000 9443 ];
               networking.firewall.enable = true; # TODO: hardening
 
               system.stateVersion = "22.11";
