@@ -50,7 +50,6 @@
         };
 
         hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
-          # Dont overwrite customised configuration
 
           # https://dev.to/ifenna__/adding-colors-to-bash-scripts-48g4
           echo -e '\n\n\n\e[32m\tAmbiente pronto!\e[0m\n'
@@ -283,15 +282,7 @@
               # services.github-runner.extraEnvironment = ["/run/wrappers/bin"];
 
               services.github-runner.extraPackages = config.environment.systemPackages;
-              # security.wrappers.newuidmap security.wrappers.newuidmap
-              # services.github-runner.Environment = [ "PATH=/run/wrappers/bin:$PATH" ];
-              #  services.github-runner.extraPackages = with pkgs; [
-              #    config.virtualisation.docker.package
-              #    hello
-              #    # sudo
-              #    procps
-              #    python39
-              #  ];
+
               virtualisation.docker.enable = true;
 
               /*
