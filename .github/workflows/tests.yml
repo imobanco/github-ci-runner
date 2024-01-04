@@ -69,7 +69,7 @@ jobs:
           action-container \
           /bin/sh \
           -c \
-          'docker run -it --rm alpine cat /etc/os-release'
+          'docker run -t --rm alpine cat /etc/os-release'
 
       - name: Testes sobre docker
         run: |
