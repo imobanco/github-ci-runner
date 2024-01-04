@@ -53,12 +53,13 @@ jobs:
 
       - name: Testes sobre DinD
         run: |
+          docker rm --force dind-container || true
           docker \
           run \
           --device=/dev/kvm \
           -d \
           -t \
-          --name=action-container --rm \
+          --name=dind-container --rm \
           -v /var/run/docker.sock:/var/run/docker.sock \
           docker:24.0.7-dind-alpine3.18 \
           tail -f /dev/null
@@ -66,7 +67,7 @@ jobs:
           docker \
           exec \
           -t \
-          action-container \
+          dind-container \
           /bin/sh \
           -c \
           'docker run -t --rm alpine cat /etc/os-release'
