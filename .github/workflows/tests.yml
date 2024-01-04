@@ -101,12 +101,12 @@ jobs:
           --rm \
           quay.io/podman/stable \
           podman run quay.io/podman/hello
+          echo
           docker \
           run \
           --privileged=true \
           --rm \
-          quay.io/podman/stable
-          echo
+          quay.io/podman/stable \
           podman run --rm almalinux \
           bash \
           -c \
@@ -116,7 +116,7 @@ jobs:
           && yum -y install pandoc which \
           && pandoc --version \
           && ldd $(which pandoc)
-          '       
+          '
 
       - name: Mais metadados
         run: |
