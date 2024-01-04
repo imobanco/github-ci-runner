@@ -305,6 +305,14 @@
 
                 Relacionado?
 
+                O sudo tb está "quebrado" nesse ambiente!
+                sudo: The "no new privileges" flag is set, which
+                prevents sudo from running as root.
+                sudo: If sudo is running in a container, you may
+                need to adjust the container configuration to
+                disable the flag.
+                https://github.com/imobanco/github-ci-runner/actions/runs/7410857271/job/20164052167#step:5:51
+
                 cannot clone: Operation not permitted
                 Error: cannot re-exec process
                 Error: Process completed with exit code 125.
