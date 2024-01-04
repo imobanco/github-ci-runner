@@ -25,15 +25,6 @@
 
         foo-bar = prev.hello;
 
-        # https://fnordig.de/2023/07/24/old-ruby-on-modern-nix/
-        # nodejs_16 = prev.nodejs_16.meta // { insecure = false; knownVulnerabilities = []; };
-        github-runner =
-          let
-            ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
-          in
-          prev.github-runner.override {
-            nodejs_16 = prev.nodejs_16.overrideAttrs ignoringVulns;
-          };
       };
     } //
     allAttrs.flake-utils.lib.eachDefaultSystem
@@ -491,15 +482,6 @@
                 flannel
                 iptables
                 socat
-
-                (
-                  writeScriptBin "run-github-runner" ''
-                    #! ${pkgs.runtimeShell} -e
-                      sudo mkdir -pv -m 0700 /run/secrets/github-runner
-                      sudo chown $(id -u):$(id -g) /run/secrets/github-runner
-                      echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
-                  ''
-                )
 
                 (
                   writeScriptBin "fix-k8s-cluster-admin-key" ''
