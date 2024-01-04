@@ -118,6 +118,20 @@ jobs:
           && ldd $(which pandoc)
           '
 
+      - name: Testes de esforço
+        run: |
+          docker \
+            run \
+            -ti \
+            --rm \
+            polinux/stress-ng \
+              --cpu 4 \
+              --io 4 \
+              --vm 2 \
+              --vm-bytes 128M \
+              --fork 4 \
+              --timeout 10s
+
       - name: Mais metadados
         run: |
            nix flake --version
