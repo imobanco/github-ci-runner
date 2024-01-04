@@ -495,7 +495,7 @@
                     #! ${pkgs.runtimeShell} -e
                       sudo mkdir -pv -m 0700 /run/secrets/github-runner
                       sudo chown $(id -u):$(id -g) /run/secrets/github-runner
-                      echo -n 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 > /run/secrets/github-runner/nixos.token
+                      echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
                   ''
                 )
               ];
