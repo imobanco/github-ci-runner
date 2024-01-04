@@ -25,6 +25,20 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
+      - name: Testes de esforço
+        run: |
+          docker \
+            run \
+            -t \
+            --rm \
+            polinux/stress-ng \
+              --cpu 4 \
+              --io 4 \
+              --vm 2 \
+              --vm-bytes 128M \
+              --fork 4 \
+              --timeout 10s
+
       - name: Executa GNU hello e python3
         run: |
           hello
@@ -117,20 +131,6 @@ jobs:
           && pandoc --version \
           && ldd $(which pandoc)
           '
-
-      - name: Testes de esforço
-        run: |
-          docker \
-            run \
-            -ti \
-            --rm \
-            polinux/stress-ng \
-              --cpu 4 \
-              --io 4 \
-              --vm 2 \
-              --vm-bytes 128M \
-              --fork 4 \
-              --timeout 10s
 
       - name: Mais metadados
         run: |
