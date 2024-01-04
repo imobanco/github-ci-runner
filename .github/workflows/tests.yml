@@ -25,6 +25,12 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
+      - name: Mais metadados
+        run: |
+          nix build --no-link --print-out-paths nixpkgs#dockerTools.examples.redis
+          nix build --no-link --print-out-paths --rebuild nixpkgs#dockerTools.examples.redis
+
+
       - name: Testes de esforço
         run: |
           docker \
