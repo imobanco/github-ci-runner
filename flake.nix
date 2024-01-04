@@ -36,6 +36,7 @@
           };
       };
     } //
+
     allAttrs.flake-utils.lib.eachDefaultSystem
       (system:
       let
@@ -50,7 +51,6 @@
         };
 
         hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
-
           # https://dev.to/ifenna__/adding-colors-to-bash-scripts-48g4
           echo -e '\n\n\n\e[32m\tAmbiente pronto!\e[0m\n'
           echo -e '\n\t\e[33mignore as proximas linhas...\e[0m\n\n\n'
@@ -249,6 +249,7 @@
                   foo-bar
 
                 ];
+
                 shell = pkgs.zsh;
                 uid = 1234;
                 autoSubUidGidRange = true;
@@ -336,6 +337,7 @@
               https://www.youtube.com/watch?v=1BquzE3Yb4I
               https://github.com/FiloSottile/age#encrypting-to-a-github-user
               https://devops.datenkollektiv.de/using-sops-with-age-and-git-like-a-pro.html
+
               sudo cat /run/secrets/example-key
               */
               /*
@@ -355,6 +357,7 @@
                 shellAliases = {
                   vim = "nvim";
                 };
+
                 enableCompletion = true;
                 autosuggestions.enable = true;
                 syntaxHighlighting.enable = true;
@@ -450,15 +453,20 @@
               # For copy/paste to work
               services.spice-vdagentd.enable = true;
 
+              nixpkgs.config.allowUnfree = true;
+
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
                 package = pkgs.nixVersions.nix_2_10;
                 readOnlyStore = true;
                 registry.nixpkgs.flake = nixpkgs; # https://bou.ke/blog/nix-tips/
-                nixPath = [ "nixpkgs=${pkgs.path}" ];
+                nixPath = [
+                  "nixpkgs=/etc/channels/nixpkgs"
+                  "nixos-config=/etc/nixos/configuration.nix"
+                ];
               };
 
-              environment.etc."channels/nixpkgs".source = "${pkgs.path}";
+              environment.etc."channels/nixpkgs".source = nixpkgs.outPath;
 
               environment.systemPackages = with pkgs; [
                 bashInteractive

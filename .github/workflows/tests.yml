@@ -1,5 +1,6 @@
 name: tests
 
+
 on: workflow_dispatch
 # on:
 #   push:
@@ -12,9 +13,9 @@ on: workflow_dispatch
 #       - 'refactor/**'
 
 
+
 jobs:
   test:
-    # runs-on: arc-runner-set
     runs-on: self-hosted
     name: Testes
     steps:
