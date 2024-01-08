@@ -97,6 +97,7 @@
             patchelf
             sops
             ssh-to-age
+            virt-viewer
           ];
 
           shellHook = ''
@@ -181,21 +182,14 @@
                   virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
 
                   virtualisation.qemu.options = [
-                    # Better display option
-                    # TODO: -display sdl,gl=on
-                    # https://gitlab.com/qemu-project/qemu/-/issues/761
-                    "-vga virtio"
-                    "-display gtk,zoom-to-fit=false"
-                    # Enable copy/paste
-                    # https://www.kraxel.org/blog/2021/05/qemu-cut-paste/
-                    "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
-                    "-device virtio-serial-pci"
-                    "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
-
-                    # https://serverfault.com/a/1119403
-                    # "-device intel-iommu,intremap=on"
-
-                    # "-net user,hostfwd=tcp::8090-::8080"
+                    # https://www.spice-space.org/spice-user-manual.html#Running_qemu_manually
+                    # remote-viewer spice://localhost:3001
+                    "-machine vmport=off"
+                    "-vga qxl"
+                    "-spice port=3001,disable-ticketing=on"
+                    "-device virtio-serial"
+                    "-chardev spicevmc,id=vdagent,debug=0,name=vdagent"
+                    "-device virtserialport,chardev=vdagent,name=com.redhat.spice.0"
                   ];
                 };
 
