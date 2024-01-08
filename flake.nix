@@ -281,8 +281,8 @@
               virtualisation.docker.enable = true;
 
               /*
-                TODO: apenas na unidades do systemd,
-                  na VM o podman funciona!
+                TODO: apenas na unidade do systemd,
+                  na VM (no "terminal") o podman funciona!
 
                 stat $(which newuidmap)
                 stat $(which newgidmap)
