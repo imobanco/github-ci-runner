@@ -324,6 +324,20 @@
                 wantedBy = [ "default.target" ];
               };
 
+              # journalctl -u prepare-secrets -b -f
+              systemd.services.prepare-secrets = {
+                script = ''
+                  echo "starting prepare-secrets script"
+
+                  # TODO: remover hardcoded
+                  mkdir -pv -m 0700 /run/secrets/github-runner
+                  chown nixuser:nixgroup /run/secrets/github-runner
+
+                  echo End
+                '';
+                wantedBy = [ "multi-user.target" ];
+              };
+
               /*
               https://github.com/vimjoyer/sops-nix-video/tree/25e5698044e60841a14dcd64955da0b1b66957a2
               https://github.com/Mic92/sops-nix/issues/65#issuecomment-929082304
@@ -487,9 +501,14 @@
                 (
                   writeScriptBin "run-github-runner" ''
                     #! ${pkgs.runtimeShell} -e
-                      sudo mkdir -pv -m 0700 /run/secrets/github-runner
-                      sudo chown $(id -u):$(id -g) /run/secrets/github-runner
-                      echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
+                      # sudo mkdir -pv -m 0700 /run/secrets/github-runner
+                      # sudo chown $(id -u):$(id -g) /run/secrets/github-runner
+                      # echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
+
+                      bash -lc '
+                      read -sp "Please enter your github PAT:" MY_PAT
+                      echo -n "$MY_PAT" > /run/secrets/github-runner/nixos.token
+                    '
                   ''
                 )
               ];

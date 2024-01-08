@@ -62,20 +62,50 @@ nix flake clone 'git+ssh://git@github.com/imobanco/github-ci-runner.git' --dest 
 && (direnv --version 1>/dev/null 2>/dev/null && direnv allow) \
 || nix develop --command $SHELL
 ```
-
-
-Por hora está sendo feito um hardcode do PAT. 
-Cole o valor do seu PAT no script `run-github-runner`.
-
-
-Após adicionar o PAT:
-```bash
-rm -fv nixos.qcow2;  
 env NIXPKGS_ALLOW_UNFREE=1 \
 NIXPKGS_ALLOW_INSECURE=1 \
+
+Passo 1: Iniciar a VM:
+```bash
+rm -fv nixos.qcow2;  
+
 nix run --impure --refresh --verbose .#vm
 ```
 
-O histórico é populado com comandos úteis.
-Usar seta para cima e enter.
+
+Passo 2: Em outro terminal, mas no mesmo diretório:
+```bash
+remote-viewer spice://localhost:3001
+```
+
+
+Passo 3: Injetando manualmente o PAT. No terminal da VM use 
+"seta para cima" (para acessar o histórico):
+```bash
+run-github-runner && sudo systemctl restart github-runner-nixos.service
+```
+
+
+Passo 4: Verifique que o runner aparece no link:
+https://github.com/imobanco/github-ci-runner/actions/runners?tab=self-hosted
+
+
+Passo 5: No terminal do clone local (apenas para testes manuais) do repositório:
+```bash
+export GH_TOKEN=ghp_yyyyyyyyyyyyyyy
+```
+
+
+Passo 6: Iniando manualmente o workflow 
+Note: o remoto tenta iniciar a execução com o código que está no REMOTO, ou seja,
+modificações apenas locais não são executadas.
+```bash
+gh workflow run tests.yml --ref feature/github-runner-as-systemd-service
+```
+Refs.:
+- https://docs.github.com/en/enterprise-server@3.11/actions/using-workflows/manually-running-a-workflow?tool=cli#running-a-workflow
+
+
+Pelo navegador:
+https://github.com/imobanco/github-ci-runner/actions
 
