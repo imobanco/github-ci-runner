@@ -27,13 +27,19 @@
 
         # https://fnordig.de/2023/07/24/old-ruby-on-modern-nix/
         # nodejs_16 = prev.nodejs_16.meta // { insecure = false; knownVulnerabilities = []; };
-        github-runner =
-          let
-            ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
-          in
-          prev.github-runner.override {
-            nodejs_16 = prev.nodejs_16.overrideAttrs ignoringVulns;
-          };
+        #github-runner =
+        #  let
+        #    ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
+        #  in
+        #  prev.github-runner.override {
+        #    nodejs_16 = prev.nodejs_20.overrideAttrs ignoringVulns;
+        #  };
+
+        #        github-runner = prev.github-runner.override {
+        #            nodejs_20 = prev.nodejs_20;
+        #            # nodejs_20 = true;
+        #            # nodeRuntimes = [ "node20" ];
+        #          };
       };
     } //
 
@@ -400,11 +406,11 @@
 
               fonts = {
                 fontDir.enable = true;
-                fonts = with pkgs; [
+                packages = with pkgs; [
                   powerline
                   powerline-fonts
                 ];
-                enableDefaultFonts = true;
+                enableDefaultPackages = true;
                 enableGhostscriptFonts = true;
               };
 

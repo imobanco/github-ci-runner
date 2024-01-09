@@ -20,7 +20,7 @@ jobs:
     name: Testes
     steps:
       - name: checkout PR merge commit
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Executa um echo
         run: echo 'Olá mundo!'
