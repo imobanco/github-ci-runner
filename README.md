@@ -53,8 +53,7 @@ Gerar token:
 - com os seguintes checks: https://github.com/myoung34/docker-github-actions-runner/wiki/Usage#token-scope
 
 
-Como o copy/paste está quebrado nesse momento, é necessário
-clonar o repositório.
+Passo 0: Clonar o repositório:
 ```bash
 nix flake clone 'git+ssh://git@github.com/imobanco/github-ci-runner.git' --dest github-ci-runner \
 && cd github-ci-runner 1>/dev/null 2>/dev/null \
@@ -62,8 +61,7 @@ nix flake clone 'git+ssh://git@github.com/imobanco/github-ci-runner.git' --dest 
 && (direnv --version 1>/dev/null 2>/dev/null && direnv allow) \
 || nix develop --command $SHELL
 ```
-env NIXPKGS_ALLOW_UNFREE=1 \
-NIXPKGS_ALLOW_INSECURE=1 \
+
 
 Passo 1: Iniciar a VM:
 ```bash
