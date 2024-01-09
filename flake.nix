@@ -179,6 +179,9 @@
               boot.loader.systemd-boot.enable = true;
               fileSystems."/" = { device = "/dev/hda1"; };
 
+              # O Kernel de Fonseca é 5.*
+              boot.kernelPackages = pkgs.linuxKernel.packages.linux_rt_5_15;
+
               virtualisation.vmVariant =
                 {
 
@@ -286,6 +289,7 @@
                 TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
               */
               services.github-runner.enable = true;
+              # services.github-runner.name = ""; # Se não for setado usa o hostname
               services.github-runner.ephemeral = true;
               services.github-runner.user = "nixuser";
               # services.github-runner.runnerGroup = "nixgroup";
