@@ -116,7 +116,7 @@
             || nix build $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
 
             test -L .profiles/nixosConfigurations."$system".vm.config.system.build.vm \
-            || nix build --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
+            || nix build --impure --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
 
             # For SOPS
             # test -d ~/.config/sops/age || mkdir -pv ~/.config/sops/age
@@ -423,11 +423,11 @@
               # https://github.com/NixOS/nixpkgs/issues/21332#issuecomment-268730694
               services.openssh = {
                 allowSFTP = true;
-                kbdInteractiveAuthentication = false;
+                settings.KbdInteractiveAuthentication = false;
                 enable = true;
-                forwardX11 = false;
-                passwordAuthentication = false;
-                permitRootLogin = "yes";
+                # settings.ForwardX11 = false;
+                settings.PasswordAuthentication = false;
+                settings.PermitRootLogin = "yes";
                 ports = [ 10022 ];
                 authorizedKeysFiles = [
                   "${ pkgs.writeText "nixuser-keys.pub" "${toString nixuserKeys}" }"
@@ -463,10 +463,11 @@
 
               nixpkgs.config.allowUnfree = true;
 
+              boot.readOnlyNixStore = true;
+
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
                 package = pkgs.nixVersions.nix_2_10;
-                readOnlyStore = true;
                 registry.nixpkgs.flake = nixpkgs; # https://bou.ke/blog/nix-tips/
                 nixPath = [
                   "nixpkgs=/etc/channels/nixpkgs"
