@@ -48,9 +48,9 @@ RUNNER_SCOPE="org" SCOPE_TARGET="imobanco" bash ./ops/bash/entrypoint.sh
 # github self-hosted runner em uma máquina virtual NixOS usando systemd
 
 
-Gerar token:
-- onde gerar: https://github.com/settings/tokens
-- com os seguintes checks: https://github.com/myoung34/docker-github-actions-runner/wiki/Usage#token-scope
+Gerar o PAT:
+- Onde gerar? https://github.com/settings/tokens/new
+- Com os seguintes checks: https://github.com/myoung34/docker-github-actions-runner/wiki/Usage#token-scope
 
 
 Passo 0: Clonar o repositório:
