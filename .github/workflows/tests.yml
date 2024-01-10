@@ -14,8 +14,8 @@ on: workflow_dispatch
 
 jobs:
   test:
-    # runs-on: arc-runner-set
-    runs-on: self-hosted
+    runs-on: arc-runner-set
+    # runs-on: self-hosted
     name: Testes
     steps:
       - name: checkout PR merge commit

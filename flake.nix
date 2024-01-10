@@ -25,105 +25,150 @@
 
         foo-bar = prev.hello;
 
+        # https://fnordig.de/2023/07/24/old-ruby-on-modern-nix/
+        # nodejs_16 = prev.nodejs_16.meta // { insecure = false; knownVulnerabilities = []; };
+#        github-runner =
+#          let
+#            ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
+#          in
+#          prev.github-runner.override {
+#            nodejs_16 = prev.nodejs_20.overrideAttrs ignoringVulns;
+#          };
+
       };
     } //
-    allAttrs.flake-utils.lib.eachDefaultSystem
-      (system:
+    (
       let
-        name = "github-ci-runner";
+        # nix flake show --allow-import-from-derivation --impure --refresh .#
+        suportedSystems = [
+          "x86_64-linux"
+          "aarch64-linux"
+          # "aarch64-darwin"
+        ];
 
-        pkgsAllowUnfree = import nixpkgs {
-          inherit system;
-          overlays = [ self.overlays.default ];
-          config = {
-            allowUnfree = true;
-          };
-        };
-
-        hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
-          # Dont overwrite customised configuration
-
-          # https://dev.to/ifenna__/adding-colors-to-bash-scripts-48g4
-          echo -e '\n\n\n\e[32m\tAmbiente pronto!\e[0m\n'
-          echo -e '\n\t\e[33mignore as proximas linhas...\e[0m\n\n\n'
-        '';
-
-        # https://gist.github.com/tpwrules/34db43e0e2e9d0b72d30534ad2cda66d#file-flake-nix-L28
-        pleaseKeepMyInputs = pkgsAllowUnfree.writeTextDir "bin/.please-keep-my-inputs"
-          (builtins.concatStringsSep " " (builtins.attrValues allAttrs));
       in
-      rec {
+      allAttrs.flake-utils.lib.eachSystem suportedSystems
+        (system:
+        let
+          name = "github-ci-runner";
 
-        packages.vm = self.nixosConfigurations.vm.config.system.build.toplevel;
+          pkgsAllowUnfree = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+            config = {
+              allowUnfree = true;
+            };
+          };
 
-        /*
-        # Utilized by `nix run .#<name>`
+          hack = pkgsAllowUnfree.writeShellScriptBin "hack" ''
+            # Dont overwrite customised configuration
 
-        rm -fv nixos.qcow2
-        nix run --impure --refresh --verbose .#vm
-
-        # Open the QMEU VM terminal and:
-        start-github-runner-with-pat "$PAT"
-        */
-        apps.vm = {
-          type = "app";
-          program = "${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm";
-        };
-
-        # nix fmt
-        formatter = pkgsAllowUnfree.nixpkgs-fmt;
-
-        devShells.default = pkgsAllowUnfree.mkShell {
-          buildInputs = with pkgsAllowUnfree; [
-            age
-            allAttrs.podman-rootless.packages.${system}.podman
-            bashInteractive
-            coreutils
-            curl
-            gettext
-            gh
-            gnumake
-            hack
-            httpie
-            jq
-            patchelf
-            sops
-            ssh-to-age
-          ];
-
-          shellHook = ''
-            # TODO: documentar esse comportamento,
-            # devo abrir issue no github do nixpkgs
-            export TMPDIR=/tmp
-
-            echo "Entering the nix devShell no github-ci-runner"
-
-            test -d .profiles || mkdir -v .profiles
-
-            test -L .profiles/dev \
-            || nix develop --impure .# --profile .profiles/dev --command true
-
-            test -L .profiles/dev-shell-default \
-            || nix build --impure $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
-
-            test -L .profiles/nixosConfigurations."$system".vm.config.system.build.vm \
-            || nix build --impure --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
-
-            # For SOPS
-            # test -d ~/.config/sops/age || mkdir -pv ~/.config/sops/age
-            # test -f ~/.config/sops/age/keys.txt || age-keygen -o ~/.config/sops/age/keys.txt
-            # https://github.com/getsops/sops/pull/860/files#diff-7b3ed02bc73dc06b7db906cf97aa91dec2b2eb21f2d92bc5caa761df5bbc168fR192
-            # test -d secrets || mkdir -v secrets
-            # test -f secrets/secrets.yaml.encrypted \
-            # || sops \
-            # --encrypt \
-            # --age $(age-keygen -y ~/.config/sops/age/keys.txt) \
-            # secrets/secrets.yaml > secrets/secrets.yaml.encrypted
-
-            hack
+            # https://dev.to/ifenna__/adding-colors-to-bash-scripts-48g4
+            echo -e '\n\n\n\e[32m\tAmbiente pronto!\e[0m\n'
+            echo -e '\n\t\e[33mignore as proximas linhas...\e[0m\n\n\n'
           '';
-        };
-      })
+
+          # https://gist.github.com/tpwrules/34db43e0e2e9d0b72d30534ad2cda66d#file-flake-nix-L28
+          pleaseKeepMyInputs = pkgsAllowUnfree.writeTextDir "bin/.please-keep-my-inputs"
+            (builtins.concatStringsSep " " (builtins.attrValues allAttrs));
+        in
+        rec {
+
+          packages.vm = self.nixosConfigurations.vm.config.system.build.toplevel;
+
+          /*
+            # Utilized by `nix run .#<name>`
+
+            rm -fv nixos.qcow2
+            nix run --impure --refresh --verbose .#vm
+
+            # Open the QMEU VM terminal and:
+            start-github-runner-with-pat "$PAT"
+          */
+          apps.vm = {
+            type = "app";
+            program = "${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm";
+          };
+
+          packages.automatic-vm = pkgsAllowUnfree.writeShellApplication {
+            name = "run-nixos-vm";
+            runtimeInputs = with pkgsAllowUnfree; [ libcanberra libcanberra-gtk2 virt-viewer ];
+            text = ''
+              ${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
+
+              for _ in web{0..10};do
+                if remote-viewer spice://localhost:3001
+                then
+                  break
+                fi
+                date +'%d/%m/%Y %H:%M:%S:%3N'
+                sleep 0.5
+              done;
+              # remote-viewer spice://127.0.0.1:5930
+              kill $PID_QEMU
+            '';
+          };
+
+          apps.run-github-runner = {
+            type = "app";
+            program = "${self.packages."${system}".automatic-vm}/bin/run-nixos-vm";
+          };
+
+          # nix fmt
+          formatter = pkgsAllowUnfree.nixpkgs-fmt;
+
+          devShells.default = pkgsAllowUnfree.mkShell {
+            buildInputs = with pkgsAllowUnfree; [
+              age
+              allAttrs.podman-rootless.packages.${system}.podman
+              bashInteractive
+              coreutils
+              curl
+              gettext
+              gh
+              gnumake
+              hack
+              httpie
+              jq
+              patchelf
+              sops
+              ssh-to-age
+            ];
+
+            shellHook = ''
+              # TODO: documentar esse comportamento,
+              # devo abrir issue no github do nixpkgs
+              export TMPDIR=/tmp
+
+              echo "Entering the nix devShell no github-ci-runner"
+
+              test -d .profiles || mkdir -v .profiles
+
+              test -L .profiles/dev \
+              || nix develop --impure .# --profile .profiles/dev --command true
+
+              test -L .profiles/dev-shell-default \
+              || nix build --impure $(nix eval --impure --raw .#devShells."$system".default.drvPath) --out-link .profiles/dev-shell-"$system"-default
+
+              test -L .profiles/nixosConfigurations."$system".vm.config.system.build.vm \
+              || nix build --impure --out-link .profiles/nixosConfigurations."$system".vm.config.system.build.vm .#nixosConfigurations.vm.config.system.build.vm
+
+              # For SOPS
+              # test -d ~/.config/sops/age || mkdir -pv ~/.config/sops/age
+              # test -f ~/.config/sops/age/keys.txt || age-keygen -o ~/.config/sops/age/keys.txt
+              # https://github.com/getsops/sops/pull/860/files#diff-7b3ed02bc73dc06b7db906cf97aa91dec2b2eb21f2d92bc5caa761df5bbc168fR192
+              # test -d secrets || mkdir -v secrets
+              # test -f secrets/secrets.yaml.encrypted \
+              # || sops \
+              # --encrypt \
+              # --age $(age-keygen -y ~/.config/sops/age/keys.txt) \
+              # secrets/secrets.yaml > secrets/secrets.yaml.encrypted
+
+              hack
+            '';
+          };
+        })
+    )
     // {
       nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
         # About system and maybe --impure
@@ -154,6 +199,9 @@
               boot.loader.systemd-boot.enable = true;
               fileSystems."/" = { device = "/dev/hda1"; };
 
+              # O Kernel de Fonseca é 5.*
+              boot.kernelPackages = pkgs.linuxKernel.packages.linux_rt_5_15;
+
               virtualisation.vmVariant =
                 {
 
@@ -173,21 +221,16 @@
                   virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
 
                   virtualisation.qemu.options = [
-                    # Better display option
-                    # TODO: -display sdl,gl=on
-                    # https://gitlab.com/qemu-project/qemu/-/issues/761
-                    "-vga virtio"
-                    "-display gtk,zoom-to-fit=false"
-                    # Enable copy/paste
-                    # https://www.kraxel.org/blog/2021/05/qemu-cut-paste/
-                    "-chardev qemu-vdagent,id=ch1,name=vdagent,clipboard=on"
-                    "-device virtio-serial-pci"
-                    "-device virtserialport,chardev=ch1,id=ch1,name=com.redhat.spice.0"
+                    # https://www.spice-space.org/spice-user-manual.html#Running_qemu_manually
+                    # remote-viewer spice://localhost:3001
 
-                    # https://serverfault.com/a/1119403
-                    # "-device intel-iommu,intremap=on"
-
-                    # "-net user,hostfwd=tcp::8090-::8080"
+                    # "-daemonize" # How to save the QEMU PID?
+                    "-machine vmport=off"
+                    "-vga qxl"
+                    "-spice port=3001,disable-ticketing=on"
+                    "-device virtio-serial"
+                    "-chardev spicevmc,id=vdagent,debug=0,name=vdagent"
+                    "-device virtserialport,chardev=vdagent,name=com.redhat.spice.0"
                   ];
                 };
 
@@ -255,35 +298,7 @@
                 ];
               };
 
-              /*
-                https://github.com/NixOS/nixpkgs/issues/169812
-                https://github.com/actions/runner/issues/1882#issuecomment-1427930611
-                nix shell nixpkgs#github-runner --command \
-                sh \
-                -c \
-                'config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh'
-                config.sh --url https://github.com/imobanco/github-ci-runner --pat "$PAT" --ephemeral && run.sh
-                TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
-              */
-              services.github-runner.enable = true;
-              services.github-runner.ephemeral = true;
-              services.github-runner.user = "nixuser";
-              # services.github-runner.runnerGroup = "nixgroup";
-              services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
-              # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
-              services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
-              services.github-runner.extraPackages = with pkgs; [
-                config.virtualisation.docker.package
-                hello
-                # sudo
-                procps
-                python39
-              ];
-              virtualisation.docker.enable = true;
-              systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" ];
-              # systemd.services.github-runner."nixos".extraPackages = with pkgs; [ which sudo ];
-
-              systemd.user.services.populate-history-vagrant = {
+              systemd.user.services.populate-history = {
                 script = ''
                   echo "Started"
 
@@ -361,11 +376,11 @@
 
               fonts = {
                 fontDir.enable = true;
-                fonts = with pkgs; [
+                packages = with pkgs; [
                   powerline
                   powerline-fonts
                 ];
-                enableDefaultFonts = true;
+                enableDefaultPackages = true;
                 enableGhostscriptFonts = true;
               };
 
@@ -400,11 +415,11 @@
               # https://github.com/NixOS/nixpkgs/issues/21332#issuecomment-268730694
               services.openssh = {
                 allowSFTP = true;
-                kbdInteractiveAuthentication = false;
+                settings.KbdInteractiveAuthentication = false;
                 enable = true;
-                forwardX11 = false;
-                passwordAuthentication = false;
-                permitRootLogin = "yes";
+                # settings.ForwardX11 = false;
+                settings.PasswordAuthentication = false;
+                settings.PermitRootLogin = "yes";
                 ports = [ 10022 ];
                 authorizedKeysFiles = [
                   "${ pkgs.writeText "nixuser-keys.pub" "${toString nixuserKeys}" }"
@@ -440,10 +455,11 @@
 
               # nixpkgs.config.allowUnfree = true;
 
+              boot.readOnlyNixStore = true;
+
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
                 package = pkgs.nixVersions.nix_2_10;
-                readOnlyStore = true;
                 registry.nixpkgs.flake = nixpkgs; # https://bou.ke/blog/nix-tips/
                 nixPath = [ "nixpkgs=${pkgs.path}" ];
               };
