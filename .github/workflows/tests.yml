@@ -31,7 +31,7 @@ jobs:
 
       - name: Metadatas
         run: |
-          # cat /etc/os*release
+          cat /etc/os*release
           # cat /etc/group
           uname -a
           id
