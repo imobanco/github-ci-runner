@@ -24,11 +24,6 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
-      - name: Executa GNU hello e python3
-        run: |
-          hello
-          python --version
-
       - name: Metadatas
         run: |
           cat /etc/os*release
