@@ -25,16 +25,6 @@
 
         foo-bar = prev.hello;
 
-        # https://fnordig.de/2023/07/24/old-ruby-on-modern-nix/
-        # nodejs_16 = prev.nodejs_16.meta // { insecure = false; knownVulnerabilities = []; };
-#        github-runner =
-#          let
-#            ignoringVulns = x: x // { meta = (x.meta // { knownVulnerabilities = [ ]; }); };
-#          in
-#          prev.github-runner.override {
-#            nodejs_16 = prev.nodejs_20.overrideAttrs ignoringVulns;
-#          };
-
       };
     } //
     (
