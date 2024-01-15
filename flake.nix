@@ -1,6 +1,13 @@
 {
   description = "Este é o nix (com flakes) para o ambiente de desenvolvimento do github-ci-runner";
 
+    /*
+    nix \
+    flake \
+    update \
+    --override-input nixpkgs github:NixOS/nixpkgs/c1be43e8e837b8dbee2b3665a007e761680f0c3d \
+    --override-input flake-utils github:numtide/flake-utils/4022d587cbbfd70fe950c1e2083a02621806a725
+    */
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
 
@@ -560,7 +567,7 @@
 
               networking.firewall.enable = true; # TODO: hardening
 
-              system.stateVersion = "22.11";
+              system.stateVersion = "23.11";
             })
 
           { nixpkgs.overlays = [ self.overlays.default ]; }
