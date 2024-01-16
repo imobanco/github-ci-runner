@@ -203,9 +203,9 @@
                   programs.dconf.enable = true;
                   # security.polkit.enable = true; # TODO: hardening?
 
-                  virtualisation.memorySize = 1024 * 8; # Use MiB memory.
+                  virtualisation.memorySize = 1024 * 3; # Use MiB memory.
                   virtualisation.diskSize = 1024 * 50; # Use MiB memory.
-                  virtualisation.cores = 8; # Number of cores.
+                  virtualisation.cores = 2; # Number of cores.
                   virtualisation.graphics = true;
 
                   virtualisation.resolution = lib.mkForce { x = 1024; y = 768; };
