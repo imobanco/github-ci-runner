@@ -346,7 +346,7 @@
                   # TODO: https://stackoverflow.com/a/67169387
                   echo "journalctl -xeu github-runner-nixos.service" >> "$DESTINATION"
                   echo "systemctl status github-runner-nixos.service | cat" >> "$DESTINATION"
-                  echo "run-github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
+                  echo "save-pat && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
 
                   echo "Ended"
                 '';
@@ -529,16 +529,17 @@
                 which
 
                 (
-                  writeScriptBin "run-github-runner" ''
+                  writeScriptBin "save-pat" ''
                     #! ${pkgs.runtimeShell} -e
                       # sudo mkdir -pv -m 0700 /run/secrets/github-runner
                       # sudo chown $(id -u):$(id -g) /run/secrets/github-runner
                       # echo -n ghp_yyyyy > /run/secrets/github-runner/nixos.token
 
-                      bash -lc '
+                      bash -lc \
+                      '
                       read -sp "Please enter your github PAT:" MY_PAT
                       echo -n "$MY_PAT" > /run/secrets/github-runner/nixos.token
-                    '
+                      '
                   ''
                 )
               ];
