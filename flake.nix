@@ -81,6 +81,8 @@
             runtimeInputs = [ pkgsAllowUnfree.virt-viewer ];
             text = ''
               ${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
+              echo started
+              echo $PID_QEMU
 
               for _ in web{0..10};do
                 # Aparentemente pode ocorrer uma condição de corrida
@@ -94,6 +96,8 @@
               done;
               # remote-viewer spice://127.0.0.1:5930
               kill $PID_QEMU
+
+              echo ended
             '';
           };
 
