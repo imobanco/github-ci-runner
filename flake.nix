@@ -297,9 +297,8 @@
                   DESTINATION=/home/nixuser/.zsh_history
 
                   # TODO: https://stackoverflow.com/a/67169387
-                  echo "journalctl -xeu github-runner-nixos.service" >> "$DESTINATION"
-                  echo "systemctl status github-runner-nixos.service | cat" >> "$DESTINATION"
-                  echo "run-github-runner && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
+                  echo "GITHUB_PAT=ghp_yyyyyyyyyyyyyyy" >> "$DESTINATION"
+                  echo "bash -lc 'read -sp "Please enter your github PAT:" GITHUB_PAT'" >> "$DESTINATION"
 
                   echo "Ended"
                 '';
