@@ -89,6 +89,7 @@
               for _ in web{0..10};do
                 # Aparentemente pode ocorrer uma condição de corrida
                 # TODO: https://unix.stackexchange.com/a/698488
+                # nc -vz localhost 3001 https://serverfault.com/questions/1059834/cant-access-vnc-port-from-local-network
                 if remote-viewer spice://localhost:3001
                 then
                   break
@@ -298,7 +299,8 @@
 
                   # TODO: https://stackoverflow.com/a/67169387
                   echo "GITHUB_PAT=ghp_yyyyyyyyyyyyyyy" >> "$DESTINATION"
-                  echo "bash -lc 'read -sp "Please enter your github PAT:" GITHUB_PAT'" >> "$DESTINATION"
+
+                  # echo "bash -lc 'read -sp "Please enter your github PAT:" GITHUB_PAT'" >> "$DESTINATION"
 
                   echo "Ended"
                 '';
