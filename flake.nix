@@ -83,6 +83,8 @@
               ${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
 
               for _ in web{0..10};do
+                # Aparentemente pode ocorrer uma condição de corrida
+                # TODO: https://unix.stackexchange.com/a/698488
                 if remote-viewer spice://localhost:3001
                 then
                   break
