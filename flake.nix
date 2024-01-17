@@ -85,7 +85,6 @@
               o spice/VNC interno a VM inicializa
               o remote-viewer tenta conectar, mas o spice não está pronto ainda
 
-
               TODO: idealmente não deveria ser preciso ter mais uma dependência (o curl)
                     para poder sincronizar o cliente e o server. Será que no caso de 
                     ambos estarem na mesma máquina seria melhor usar virt-viewer -fw?
