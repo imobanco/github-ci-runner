@@ -312,7 +312,8 @@
               services.github-runner.ephemeral = true;
               services.github-runner.replace = true;
               services.github-runner.user = "nixuser";
-               services.github-runner.runnerGroup = "nixgroup";
+              services.github-runner.runnerGroup = "nixgroup";
+              services.github-runner.extraLabels = ["nixos"];
               services.github-runner.url = "https://github.com/imobanco";
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
