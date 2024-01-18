@@ -315,6 +315,7 @@
               services.github-runner.runnerGroup = "nixgroup";
               services.github-runner.extraLabels = ["nixos"];
               services.github-runner.url = "https://github.com/imobanco";
+              services.github-runner.extraEnvironment = { RUNNER_ROOT = "/tmp/.github-runner"; };
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               # services.github-runner.extraEnvironment = ["/run/wrappers/bin"];
