@@ -24,6 +24,9 @@ jobs:
       - name: checkout PR merge commit
         uses: actions/checkout@v4
 
+      - name: Executa pwd
+        run: pwd
+
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
