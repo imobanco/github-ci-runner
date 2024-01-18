@@ -82,22 +82,34 @@
 
           packages.automatic-vm = pkgsAllowUnfree.writeShellApplication {
             name = "run-nixos-vm";
-            runtimeInputs = with pkgsAllowUnfree; [ libcanberra libcanberra-gtk2 virt-viewer ];
+            runtimeInputs = with pkgsAllowUnfree; [ curl virt-viewer ];
+            /*
+              Pode ocorrer uma condição de corrida de seguinte forma:
+              a VM inicializa (o processo não é bloqueante, executa em background)
+              o spice/VNC interno a VM inicializa
+              o remote-viewer tenta conectar, mas o spice não está pronto ainda
+
+              TODO: idealmente não deveria ser preciso ter mais uma dependência (o curl)
+                    para poder sincronizar o cliente e o server. Será que no caso de
+                    ambos estarem na mesma máquina seria melhor usar virt-viewer -fw?
+              https://unix.stackexchange.com/a/698488
+            */
             text = ''
               ${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
 
-              for _ in web{0..10};do
-                # Aparentemente pode ocorrer uma condição de corrida
-                # TODO: https://unix.stackexchange.com/a/698488
-                # nc -vz localhost 3001 https://serverfault.com/questions/1059834/cant-access-vnc-port-from-local-network
-                if remote-viewer spice://localhost:3001
+              export VNC_PORT=3001
+
+              for _ in web{0..50}; do
+                if [[ $(curl --fail --silent http://localhost:"$VNC_PORT") -eq 1 ]];
                 then
                   break
                 fi
-                date +'%d/%m/%Y %H:%M:%S:%3N'
-                sleep 0.5
+                # date +'%d/%m/%Y %H:%M:%S:%3N'
+                sleep 0.2
               done;
-              # remote-viewer spice://127.0.0.1:5930
+
+              remote-viewer spice://localhost:"$VNC_PORT"
+
               kill $PID_QEMU
             '';
           };
