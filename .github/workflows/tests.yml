@@ -53,17 +53,17 @@ jobs:
           # cat /etc/group
           uname -a
           echo 
-          id
+          id 
           echo 
-          pwd
+          pwd 
           echo 
-          ls -alh
+          ls -alh 
           echo 
-          nproc
+          nproc 
           echo 
-          free -h
+          free -h 
           echo 
-          # sudo id
+          # sudo id 
           # A ideia aqui é testar persistência de estado
           cat $HOME/logs.txt || true
           echo FOO-BAR > $HOME/logs.txt
