@@ -137,6 +137,8 @@
               # devo abrir issue no github do nixpkgs
               export TMPDIR=/tmp
 
+              export HOSTNAME=$(hostname)
+
               echo "Entering the nix devShell no github-ci-runner"
 
               test -d .profiles || mkdir -v .profiles
@@ -306,11 +308,12 @@
                 TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
               */
               services.github-runner.enable = true;
-              # services.github-runner.name = ""; # Se não for setado usa o hostname
+              services.github-runner.name = builtins.getEnv "HOSTNAME"; # Se não for setado usa o hostname
               services.github-runner.ephemeral = true;
+              services.github-runner.replace = true;
               services.github-runner.user = "nixuser";
-              # services.github-runner.runnerGroup = "nixgroup";
-              services.github-runner.url = "https://github.com/imobanco/github-ci-runner";
+               services.github-runner.runnerGroup = "nixgroup";
+              services.github-runner.url = "https://github.com/imobanco";
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               # services.github-runner.extraEnvironment = ["/run/wrappers/bin"];
@@ -354,9 +357,14 @@
                   DESTINATION=/home/nixuser/.zsh_history
 
                   # TODO: https://stackoverflow.com/a/67169387
-                  echo "journalctl -xeu github-runner-nixos.service" >> "$DESTINATION"
-                  echo "systemctl status github-runner-nixos.service | cat" >> "$DESTINATION"
-                  echo "save-pat && sudo systemctl restart github-runner-nixos.service" >> "$DESTINATION"
+                  echo "journalctl -xeu github-runner-${builtins.getEnv "HOSTNAME"}.service" >> "$DESTINATION"
+                  echo "systemctl status github-runner-${builtins.getEnv "HOSTNAME"}.service | cat" >> "$DESTINATION"
+                  echo "save-pat && sudo systemctl restart github-runner-${builtins.getEnv "HOSTNAME"}.service" >> "$DESTINATION"
+                  echo "sudo systemctl restart github-runner-${builtins.getEnv "HOSTNAME"}.service" >> "$DESTINATION"
+
+                  echo ${builtins.getEnv "GH_TOKEN"} > /run/secrets/github-runner/nixos.token
+
+                  sudo systemctl restart github-runner-${builtins.getEnv "HOSTNAME"}.service
 
                   echo "Ended"
                 '';
