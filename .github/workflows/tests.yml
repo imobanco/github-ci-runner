@@ -27,14 +27,11 @@ jobs:
           # Nix Flakes doesn't work on shallow clones
           fetch-depth: 0
 
-      - name: Executa pwd
-        run: pwd
-
-      - name: Executa um echo
-        run: echo 'Olá mundo!'
-
-      - name: Executa profile install
-        run: ls -la /nix/store | grep hello
+      - name: Recolhe info
+        run: |
+          pwd
+          ls -la /nix/store | grep hello
+          id
 
       - name: Executa profile install
         run: nix profile install nixpkgs#hello
