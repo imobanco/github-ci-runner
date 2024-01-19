@@ -30,6 +30,9 @@ jobs:
       - name: Executa um echo
         run: echo 'Olá mundo!'
 
+      - name: Executa profile install
+        run: nix profile install
+
       - name: Testes de esforço
         run: |
           docker \
