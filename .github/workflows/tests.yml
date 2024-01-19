@@ -32,6 +32,7 @@ jobs:
           pwd
           ls -la /nix/store | grep hello
           id
+          nix show-config
 
       - name: Executa profile install
         run: nix profile install nixpkgs#hello
