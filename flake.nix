@@ -325,7 +325,7 @@
               '';
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
-                  "/tmp"
+                  "/nix"
                 ];
               };
 
