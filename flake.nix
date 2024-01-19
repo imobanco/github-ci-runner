@@ -326,7 +326,17 @@
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
                   "/nix"
+                  # "/nix/var/nix/profiles/per-user/" # https://github.com/cachix/cachix-ci-agents/blob/63f3f600d13cd7688e1b5db8ce038b686a5d29da/agents/linux.nix#L30C26-L30C59
                 ];
+
+                PrivateUsers = false;
+                DynamicUser = false;
+                PrivateDevices = false;
+                PrivateMounts = false;
+                AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
+                CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
+                RestrictSUIDSGID = false;
+                DeviceAllow = [ "/dev/kvm" ];
               };
 
               virtualisation.docker.enable = true;

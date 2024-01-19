@@ -25,6 +25,10 @@ jobs:
           ls -la /nix/store | grep hello
           echo "${PATH//:/$'\n'}"
 
+      - name: Testa ping
+        run: |
+          ping -c5 8.8.8.8
+
       - name: Recolhe info show-config
         run: |
           nix show-config
