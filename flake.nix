@@ -338,6 +338,7 @@
                 CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 RestrictSUIDSGID = false;
                 DeviceAllow = [ "/dev/kvm" ];
+                Environment = "PATH=/run/current-system/sw/bin";
               };
 
               virtualisation.docker.enable = true;
