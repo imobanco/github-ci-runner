@@ -311,11 +311,18 @@
               services.github-runner.name = builtins.getEnv "HOSTNAME"; # Se não for setado usa o hostname
               services.github-runner.ephemeral = true;
               services.github-runner.replace = true;
+#              services.github-runner.workDir = "/.github-runner-${builtins.getEnv "HOSTNAME"}";
               services.github-runner.user = "nixuser";
               services.github-runner.runnerGroup = "nixgroup";
               services.github-runner.extraLabels = ["nixos"];
+              services.github-runner.serviceOverrides = {
+                ReadWritePaths = [
+                  "/nix"
+                  "/tmp"
+                ];
+              };
               services.github-runner.url = "https://github.com/imobanco";
-              services.github-runner.extraEnvironment = { RUNNER_ROOT = "/tmp/.github-runner"; };
+#              services.github-runner.extraEnvironment = { RUNNER_ROOT = "/tmp/.github-runner-${builtins.getEnv "HOSTNAME"}"; };
               # services.github-runner.tokenFile = config.sops.secrets."github-runner/token".path;
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               # services.github-runner.extraEnvironment = ["/run/wrappers/bin"];
@@ -512,7 +519,7 @@
 
               nixpkgs.config.allowUnfree = true;
 
-              boot.readOnlyNixStore = true;
+              boot.readOnlyNixStore = false;
 
               nix = {
                 extraOptions = "experimental-features = nix-command flakes";
@@ -522,6 +529,7 @@
                   "nixpkgs=/etc/channels/nixpkgs"
                   "nixos-config=/etc/nixos/configuration.nix"
                 ];
+                settings.trusted-users = [ "root" "@wheel" "nixuser" "@nixgroup" ];
               };
 
               environment.etc."channels/nixpkgs".source = nixpkgs.outPath;
