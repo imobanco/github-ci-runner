@@ -27,6 +27,8 @@ jobs:
 
       - name: Testa ping
         run: |
+          echo $(which ping)
+          echo $(readlink -f $(which ping))
           ping -c5 8.8.8.8
 
       - name: Recolhe info show-config
