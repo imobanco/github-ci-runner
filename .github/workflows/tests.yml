@@ -23,7 +23,7 @@ jobs:
           id
           pwd
           ls -la /nix/store | grep hello
-          echo $PATH
+          echo "${PATH//:/$'\n'}"
 
       - name: Recolhe info show-config
         run: |
