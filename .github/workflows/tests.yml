@@ -32,13 +32,13 @@ jobs:
       - name: profile install hello test
         run: |
           nix profile install nixpkgs#hello
-          echo $PATH
+          echo "${PATH//:/$'\n'}"
           nix profile list
           hello
 
       - name: profile install node test
         run: |
           nix profile install nixpkgs#nodejs
-          echo $PATH
+          echo "${PATH//:/$'\n'}"
           nix profile list
           node --version
