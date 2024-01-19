@@ -29,11 +29,12 @@ jobs:
 
       - name: Recolhe info
         run: |
+          id
           pwd
           ls -la /nix/store | grep hello
-          mount -l
-          ls -la /mnt/*
-          id
+
+      - name: Recolhe info show-config
+        run: |
           nix show-config
 
       - name: Executa profile install
