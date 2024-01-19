@@ -316,7 +316,7 @@
               services.github-runner.extraPackages = config.environment.systemPackages;
               services.github-runner.name = "${GH_HOSTNAME}";
               services.github-runner.replace = true;
-              services.github-runner.runnerGroup = "nixgroup";
+              # services.github-runner.runnerGroup = "nixgroup"; # Apenas administradores da organização do github conseguem usar isso?
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
               services.github-runner.user = "nixuser";
