@@ -1,0 +1,32 @@
+name: tests
+
+
+on: workflow_dispatch
+
+
+
+jobs:
+  test:
+    runs-on:
+      group: nixgroup
+      labels: nixos
+    name: NixOS Testes
+    steps:
+      - name: checkout PR merge commit
+        uses: actions/checkout@v4
+        with:
+          # Nix Flakes doesn't work on shallow clones
+          fetch-depth: 0
+
+      - name: Recolhe info
+        run: |
+          id
+          pwd
+          ls -la /nix/store | grep hello
+
+      - name: Recolhe info show-config
+        run: |
+          nix show-config
+
+      - name: Executa profile install
+        run: nix profile install nixpkgs#hello
