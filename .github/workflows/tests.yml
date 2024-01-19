@@ -28,14 +28,16 @@ jobs:
         run: |
           nix show-config
 
-      - name: Executa profile install
+      - name: profile install hello test
         run: |
           nix profile install nixpkgs#hello
           echo $PATH
+          nix profile list
           hello
 
-      - name: Node test
+      - name: profile install node test
         run: |
           nix profile install nixpkgs#nodejs
           echo $PATH
+          nix profile list
           node --version
