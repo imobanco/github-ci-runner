@@ -29,13 +29,13 @@ jobs:
           nix show-config
 
       - name: Executa profile install
-        run: nix profile install nixpkgs#hello
+        run: |
+          nix profile install nixpkgs#hello
+          echo $PATH
+          hello
 
       - name: Node test
         run: |
-          nix run nixpkgs#nodejs -- --version
           nix profile install nixpkgs#nodejs
-          which node
+          echo $PATH
           node --version
-          npm --version
-          which npm
