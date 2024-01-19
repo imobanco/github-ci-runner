@@ -31,9 +31,10 @@ jobs:
       - name: Executa profile install
         run: nix profile install nixpkgs#hello
 
-      - name: Recolhe info show-config
+      - name: Node test
         run: |
           nix run nixpkgs#nodejs -- --version
+          nix profile install nixpkgs#nodejs
           which node
           node --version
           npm --version
