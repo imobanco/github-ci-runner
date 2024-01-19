@@ -181,6 +181,9 @@
           ({ config, nixpkgs, pkgs, lib, modulesPath, ... }:
             let
               nixuserKeys = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExR+PSB/jBwJYKfpLN+MMXs3miRn70oELTV3sXdgzpr";
+
+              GH_HOSTNAME = builtins.getEnv "HOSTNAME";
+              GH_TOKEN = builtins.getEnv "GH_TOKEN";
             in
             {
               # Internationalisation options
@@ -308,21 +311,23 @@
                 TODO: https://www.youtube.com/watch?v=G5f6GC7SnhU
               */
               services.github-runner.enable = true;
-              services.github-runner.name = builtins.getEnv "HOSTNAME"; # Se não for setado usa o hostname
               services.github-runner.ephemeral = true;
+              services.github-runner.extraLabels = [ "nixos" ];
+              services.github-runner.extraPackages = config.environment.systemPackages;
+              services.github-runner.name = "${GH_HOSTNAME}";
               services.github-runner.replace = true;
-              services.github-runner.user = "nixuser";
               services.github-runner.runnerGroup = "nixgroup";
-              services.github-runner.extraLabels = ["nixos"];
+              services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
+              services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
+              services.github-runner.user = "nixuser";
+              systemd.user.extraConfig = ''
+                DefaultEnvironment="PATH=/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
+              '';
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
-                  "/nix"
+                  "/tmp"
                 ];
               };
-              services.github-runner.url = "https://github.com/imobanco";
-              services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
-
-              services.github-runner.extraPackages = config.environment.systemPackages;
 
               virtualisation.docker.enable = true;
 
@@ -361,14 +366,14 @@
                   DESTINATION=/home/nixuser/.zsh_history
 
                   # TODO: https://stackoverflow.com/a/67169387
-                  echo "journalctl -xeu github-runner-${builtins.getEnv "HOSTNAME"}.service" >> "$DESTINATION"
-                  echo "systemctl status github-runner-${builtins.getEnv "HOSTNAME"}.service | cat" >> "$DESTINATION"
-                  echo "save-pat && sudo systemctl restart github-runner-${builtins.getEnv "HOSTNAME"}.service" >> "$DESTINATION"
-                  echo "sudo systemctl restart github-runner-${builtins.getEnv "HOSTNAME"}.service" >> "$DESTINATION"
+                  echo "journalctl -xeu github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
+                  echo "systemctl status github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
+                  echo "save-pat && sudo systemctl restart github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
+                  echo "sudo systemctl restart github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
 
-                  echo ${builtins.getEnv "GH_TOKEN"} > /run/secrets/github-runner/nixos.token
+                  echo "${GH_TOKEN}" > /run/secrets/github-runner/nixos.token
 
-                  sudo systemctl restart github-runner-${builtins.getEnv "HOSTNAME"}.service
+                  sudo systemctl restart github-runner-${GH_HOSTNAME}.service
 
                   echo "Ended"
                 '';
