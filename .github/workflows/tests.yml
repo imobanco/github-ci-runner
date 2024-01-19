@@ -31,6 +31,8 @@ jobs:
         run: |
           pwd
           ls -la /nix/store | grep hello
+          mount -l
+          ls -la /mnt/*
           id
           nix show-config
 
