@@ -53,7 +53,7 @@ jobs:
           nix profile install nixpkgs#nodejs
           echo "${PATH//:/$'\n'}"
           nix profile list
-          /home/nixuser/.nix-profile/bin/node --version
+          # /home/nixuser/.nix-profile/bin/node --version
           node --version
 
       - name: Testa sudo
