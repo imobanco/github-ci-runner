@@ -330,6 +330,8 @@
                   # "/nix/var/nix/profiles/per-user/" # https://github.com/cachix/cachix-ci-agents/blob/63f3f600d13cd7688e1b5db8ce038b686a5d29da/agents/linux.nix#L30C26-L30C59
                 ];
 
+                # NoNewPrivileges = false;
+                # PrivateTmp = false;
                 PrivateUsers = false;
                 DynamicUser = false;
                 PrivateDevices = false;
@@ -378,6 +380,7 @@
                   DESTINATION=/home/nixuser/.zsh_history
 
                   # TODO: https://stackoverflow.com/a/67169387
+                  echo "sudo systemctl cat github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "journalctl -xeu github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
                   echo "systemctl status github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "save-pat && sudo systemctl restart github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
