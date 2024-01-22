@@ -74,7 +74,7 @@ jobs:
           ls -l /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newgidmap
-          podman unshare cat /proc/self/uid_map /proc/self/gid_map
+          # podman unshare cat /proc/self/uid_map /proc/self/gid_map
           # podman --log-level debug info
           podman images
 
