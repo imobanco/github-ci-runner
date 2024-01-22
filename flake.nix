@@ -351,6 +351,8 @@
                 ProtectHome = "no";
                 ProtectSystem = "no"; # TODO: A/B teste!
                 ProtectHostname = false;
+                # RemoveIPC = false;
+                MemoryDenyWriteExecute = false; # TODO: A/B teste!
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
                 # ProtectKernelTunables = false;
