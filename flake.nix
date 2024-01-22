@@ -349,7 +349,7 @@
                 PrivateDevices = false;
                 PrivateMounts = false;
                 ProtectHome = "no";
-
+                ProtectSystem = "no"; # TODO: A/B teste!
                 ProtectHostname = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
