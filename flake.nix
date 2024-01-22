@@ -322,7 +322,7 @@
               services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
               services.github-runner.user = "nixuser";
               # systemd.user.extraConfig = ''
-              #   DefaultEnvironment="PATH=/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
+              #   DefaultEnvironment="PATH=/run/wrappers/bin:/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
               # '';
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
@@ -341,7 +341,7 @@
                 RestrictSUIDSGID = false;
                 DeviceAllow = [ "/dev/kvm" ];
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
-                Environment = "PATH=/run/wrappers/bin:"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
+                # Environment = "PATH=/run/wrappers/bin:"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };
 
               virtualisation.docker.enable = true;
