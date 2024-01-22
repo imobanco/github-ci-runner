@@ -55,6 +55,10 @@ jobs:
           nix profile list
           node --version
 
+      - name: Testa podman
+        run: |
+          podman images
+
       - name: Testa sudo
         run: |
           stat -c '%a %n' $(which sudo)
