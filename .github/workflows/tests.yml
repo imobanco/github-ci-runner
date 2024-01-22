@@ -33,16 +33,6 @@ jobs:
           /run/current-system/sw/bin/ping -c5 8.8.8.8
           ping -c5 8.8.8.8
 
-      - name: Testa docker
-        run: |
-          stat -c '%a %n' $(which docker)
-          stat -c '%a %n' $(readlink -f $(which docker))
-          stat -c '%a %n' /run/wrappers/bin/docker
-          stat -c '%a %n' /run/current-system/sw/bin/docker
-          echo 12345
-          /run/wrappers/bin/docker images
-          /run/current-system/sw/bin/docker images
-
       - name: Testa sudo
         run: |
           stat -c '%a %n' $(which sudo)

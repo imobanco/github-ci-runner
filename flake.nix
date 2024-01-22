@@ -349,7 +349,7 @@
                 PrivateMounts = false;
                 # AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 # CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
-                SystemCallFilter = lib.mkForce [ ];
+                SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
                 # DeviceAllow = [ "/dev/kvm" ];
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
