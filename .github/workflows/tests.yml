@@ -27,8 +27,9 @@ jobs:
 
       - name: Testa ping
         run: |
-          stat -c %a $(which ping)
-          stat -c %a $(readlink -f $(which ping))
+          python --version
+          stat -c '%a %n' $(which ping)
+          stat -c '%a %n' $(readlink -f $(which ping))
           /run/current-system/sw/bin/ping -c5 8.8.8.8
           ping -c5 8.8.8.8
 

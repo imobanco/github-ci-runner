@@ -314,16 +314,16 @@
               services.github-runner.ephemeral = true;
               services.github-runner.extraLabels = [ "nixos" ];
               # services.github-runner.extraPackages = config.environment.systemPackages;
-              services.github-runner.extraPackages = with pkgs; [ iputils which ];
+              services.github-runner.extraPackages = with pkgs; [ iputils which python39 ];
               services.github-runner.name = "${GH_HOSTNAME}";
               services.github-runner.replace = true;
               # services.github-runner.runnerGroup = "nixgroup"; # Apenas administradores da organização do github conseguem usar isso?
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
               services.github-runner.user = "nixuser";
-              systemd.user.extraConfig = ''
-                DefaultEnvironment="PATH=/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
-              '';
+              # systemd.user.extraConfig = ''
+              #   DefaultEnvironment="PATH=/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
+              # '';
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
                   "/nix"
