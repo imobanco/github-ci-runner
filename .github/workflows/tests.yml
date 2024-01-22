@@ -44,6 +44,7 @@ jobs:
           nix profile list
           ls -alh "$HOME"/.nix-profile
           ls -alh "$HOME"/.nix-profile/
+          ls -alh /nix/var/nix/profiles/per-user/nixuser/profile
           hello
 
       - name: profile install node test
