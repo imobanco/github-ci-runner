@@ -314,23 +314,23 @@
               services.github-runner.ephemeral = true;
               services.github-runner.extraLabels = [ "nixos" ];
               # services.github-runner.extraPackages = config.environment.systemPackages;
-              services.github-runner.extraPackages = with pkgs; [ iputils which python39 ];
+              services.github-runner.extraPackages = with pkgs; [ iputils which python39 sudo ];
               services.github-runner.name = "${GH_HOSTNAME}";
               services.github-runner.replace = true;
               # services.github-runner.runnerGroup = "nixgroup"; # Apenas administradores da organização do github conseguem usar isso?
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
               services.github-runner.user = "nixuser";
-              # systemd.user.extraConfig = ''
-              #   DefaultEnvironment="PATH=/run/wrappers/bin:/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
-              # '';
+              systemd.user.extraConfig = ''
+                DefaultEnvironment="PATH=/run/wrappers/bin:/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
+              '';
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
                   "/nix"
                   # "/nix/var/nix/profiles/per-user/" # https://github.com/cachix/cachix-ci-agents/blob/63f3f600d13cd7688e1b5db8ce038b686a5d29da/agents/linux.nix#L30C26-L30C59
                 ];
 
-                # NoNewPrivileges = false;
+                NoNewPrivileges = false;
                 # PrivateTmp = false;
                 PrivateUsers = false;
                 DynamicUser = false;
@@ -339,7 +339,7 @@
                 AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 RestrictSUIDSGID = false;
-                DeviceAllow = [ "/dev/kvm" ];
+                # DeviceAllow = [ "/dev/kvm" ];
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
                 # Environment = "PATH=/run/wrappers/bin:"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };

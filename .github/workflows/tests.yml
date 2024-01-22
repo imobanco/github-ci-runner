@@ -29,6 +29,8 @@ jobs:
         run: |
           stat -c '%a %n' $(which sudo)
           stat -c '%a %n' $(readlink -f $(which sudo))
+          stat -c '%a %n' /run/wrappers/bin/sudo
+          stat -c '%a %n' /run/current-system/sw/bin/sudo
           sudo id
           /run/wrappers/bin/sudo id
           /run/current-system/sw/bin/sudo id
