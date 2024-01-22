@@ -25,6 +25,14 @@ jobs:
           ls -la /nix/store | grep hello
           echo "${PATH//:/$'\n'}"
 
+      - name: Testa sudo
+        run: |
+          stat -c '%a %n' $(which sudo)
+          stat -c '%a %n' $(readlink -f $(which sudo))
+          sudo id
+          /run/wrappers/bin/sudo id
+          /run/current-system/sw/bin/sudo id
+
       - name: Testa ping
         run: |
           python --version
