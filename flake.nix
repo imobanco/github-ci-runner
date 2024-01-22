@@ -350,14 +350,46 @@
                 PrivateMounts = false;
                 ProtectHome = "no";
 
-                # ProtectHostname = false;
+                ProtectHostname = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
                 # ProtectKernelTunables = false;
                 # ProtectProc = "";
 
-                # AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
-                # CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
+                # https://www.redhat.com/sysadmin/mastering-systemd
+                # https://unix.stackexchange.com/a/581337
+                # https://man7.org/linux/man-pages/man7/capabilities.7.html
+                # https://medium.com/@maros.kukan/advanced-containers-with-podman-f79302de85b0
+                # https://linuxconfig.org/how-to-increase-the-security-of-systemd-services
+                AmbientCapabilities = [
+                  "CAP_CHOWN"
+                  "CAP_DAC_OVERRIDE"
+                  "CAP_IPC_LOCK"
+                  "CAP_KILL"
+                  "CAP_NET_ADMIN"
+                  "CAP_NET_BIND_SERVICE"
+                  "CAP_NET_BROADCAST"
+                  "CAP_NET_RAW"
+                  "CAP_SETGID"
+                  "CAP_SETUID"
+                  "CAP_SYS_ADMIN"
+                  "CAP_SYS_CHROOT"
+                ];
+                CapabilityBoundingSet = [
+                  "CAP_CHOWN"
+                  "CAP_DAC_OVERRIDE"
+                  "CAP_IPC_LOCK"
+                  "CAP_KILL"
+                  "CAP_NET_ADMIN"
+                  "CAP_NET_BIND_SERVICE"
+                  "CAP_NET_BROADCAST"
+                  "CAP_NET_RAW"
+                  "CAP_SETGID"
+                  "CAP_SETUID"
+                  "CAP_SYS_ADMIN"
+                  "CAP_SYS_CHROOT"
+                ];
+
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
                 # DeviceAllow = [ "/dev/kvm" ];

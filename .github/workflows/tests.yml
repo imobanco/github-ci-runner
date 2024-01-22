@@ -55,6 +55,14 @@ jobs:
           nix profile list
           node --version
 
+      - name: Testa hostname
+        run: |
+          hostname
+          hostname a1b2c3
+          hostname
+          hostname nixos
+          hostname
+
       - name: Testa podman
         run: |
           cat /proc/sys/user/max_user_namespaces
@@ -66,11 +74,8 @@ jobs:
           ls -l /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newgidmap
-          hostname
-          hostname a1b2c3
-          hostname
-          podman unshare cat /proc/self/uid_map
-          podman --log-level debug info
+          podman unshare cat /proc/self/uid_map /proc/self/gid_map
+          # podman --log-level debug info
           podman images
 
       - name: Testa sudo
