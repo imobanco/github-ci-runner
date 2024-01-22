@@ -354,7 +354,7 @@
                 RestrictSUIDSGID = false;
                 # DeviceAllow = [ "/dev/kvm" ];
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
-                Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/home/nixuser/.nix-profile/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
+                Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/home/nixuser/.nix-profile"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };
 
               virtualisation.docker.enable = true;
