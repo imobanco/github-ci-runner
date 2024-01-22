@@ -347,6 +347,7 @@
                 DynamicUser = false;
                 PrivateDevices = false;
                 PrivateMounts = false;
+                ProtectHome = "no";
                 # AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 # CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)

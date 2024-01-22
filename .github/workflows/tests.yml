@@ -42,6 +42,7 @@ jobs:
           nix profile install nixpkgs#hello
           echo "${PATH//:/$'\n'}"
           nix profile list
+          echo "$HOME"
           ls -alh /home/nixuser/.nix-profile/bin
           hello
 
