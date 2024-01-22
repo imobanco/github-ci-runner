@@ -57,6 +57,8 @@ jobs:
 
       - name: Testa podman
         run: |
+          cat /etc/subuid
+          cat /etc/subgid
           podman images
 
       - name: Testa sudo

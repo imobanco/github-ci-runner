@@ -339,6 +339,8 @@
                 ];
 
                 # ExecStart = lib.mkForce "echo Hi, %u";
+                ProtectControlGroups = false;
+                # RestrictNamespaces = false;
 
                 NoNewPrivileges = false;
                 # PrivateTmp = false;
@@ -348,6 +350,13 @@
                 PrivateDevices = false;
                 PrivateMounts = false;
                 ProtectHome = "no";
+
+                ProtectHostname = false;
+                # ProtectKernelLogs = false;
+                # ProtectKernelModules = false;
+                # ProtectKernelTunables = false;
+                # ProtectProc = "invisible";
+
                 # AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 # CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
