@@ -57,11 +57,20 @@ jobs:
 
       - name: Testa podman
         run: |
+          cat /proc/sys/user/max_user_namespaces
+          cat /proc/self/uid_map
+          grep /run /proc/self/mountinfo
           cat /etc/subuid
           cat /etc/subgid
+          ls -l /run/wrappers/bin/newuidmap
+          ls -l /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newgidmap
-          podman info
+          hostname
+          hostname a1b2c3
+          hostname
+          podman unshare cat /proc/self/uid_map
+          podman --log-level debug info
           podman images
 
       - name: Testa sudo

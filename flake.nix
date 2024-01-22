@@ -340,7 +340,6 @@
 
                 # ExecStart = lib.mkForce "echo Hi, %u";
                 ProtectControlGroups = false;
-                # RestrictNamespaces = false;
 
                 NoNewPrivileges = false;
                 # PrivateTmp = false;
@@ -351,11 +350,11 @@
                 PrivateMounts = false;
                 ProtectHome = "no";
 
-                ProtectHostname = false;
+                # ProtectHostname = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
                 # ProtectKernelTunables = false;
-                # ProtectProc = "invisible";
+                # ProtectProc = "";
 
                 # AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
                 # CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
@@ -394,6 +393,9 @@
                 https://github.com/imobanco/github-ci-runner/actions/runs/7410557206/job/20163140291#step:8:56
               */
               virtualisation.podman.enable = true;
+
+              # Funciona, mas não resolveu o erro newuidmap: write to uid_map failed: Operation not permitted
+              environment.etc.services.mode = ""; # https://github.com/containers/podman/issues/21033#issuecomment-1858199501
 
               systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" "podman" ];
 
