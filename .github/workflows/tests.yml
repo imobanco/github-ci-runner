@@ -53,7 +53,6 @@ jobs:
           nix profile install nixpkgs#nodejs
           echo "${PATH//:/$'\n'}"
           nix profile list
-          # /home/nixuser/.nix-profile/bin/node --version
           node --version
 
       - name: Testa sudo
@@ -63,6 +62,6 @@ jobs:
           stat -c '%a %n' /run/wrappers/bin/sudo
           stat -c '%a %n' /run/current-system/sw/bin/sudo
           echo 12345
-          sudo id
+          # sudo id
           /run/wrappers/bin/sudo id
           /run/current-system/sw/bin/sudo id
