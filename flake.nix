@@ -321,27 +321,39 @@
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
               services.github-runner.user = "nixuser";
-              systemd.user.extraConfig = ''
-                DefaultEnvironment="PATH=/run/wrappers/bin:/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
-              '';
+              # systemd.user.extraConfig = ''
+              #   DefaultEnvironment="PATH=/run/wrappers/bin:/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
+              # '';
+
+              # systemd.services.github-runner.path = [
+              #   # https://stackoverflow.com/a/70964228
+              #   # https://discourse.nixos.org/t/sudo-run-current-system-sw-bin-sudo-must-be-owned-by-uid-0-and-have-the-setuid-bit-set-and-cannot-chdir-var-cron-bailing-out-var-cron-permission-denied/20463/11
+              #   "/run/current-system/sw/bin"
+              #   "/run/wrappers/bin"
+              # ];
+
               services.github-runner.serviceOverrides = {
                 ReadWritePaths = [
                   "/nix"
                   # "/nix/var/nix/profiles/per-user/" # https://github.com/cachix/cachix-ci-agents/blob/63f3f600d13cd7688e1b5db8ce038b686a5d29da/agents/linux.nix#L30C26-L30C59
                 ];
 
+                # ExecStart = lib.mkForce "echo Hi, %u";
+
                 NoNewPrivileges = false;
                 # PrivateTmp = false;
                 PrivateUsers = false;
+                RestrictNamespaces = false;
                 DynamicUser = false;
                 PrivateDevices = false;
                 PrivateMounts = false;
-                AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
-                CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
+                # AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
+                # CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_SYS_ADMIN" ];
+                SystemCallFilter = lib.mkForce [ ];
                 RestrictSUIDSGID = false;
                 # DeviceAllow = [ "/dev/kvm" ];
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
-                # Environment = "PATH=/run/wrappers/bin:"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
+                # Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };
 
               virtualisation.docker.enable = true;

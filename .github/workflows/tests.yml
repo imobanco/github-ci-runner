@@ -25,16 +25,6 @@ jobs:
           ls -la /nix/store | grep hello
           echo "${PATH//:/$'\n'}"
 
-      - name: Testa sudo
-        run: |
-          stat -c '%a %n' $(which sudo)
-          stat -c '%a %n' $(readlink -f $(which sudo))
-          stat -c '%a %n' /run/wrappers/bin/sudo
-          stat -c '%a %n' /run/current-system/sw/bin/sudo
-          sudo id
-          /run/wrappers/bin/sudo id
-          /run/current-system/sw/bin/sudo id
-
       - name: Testa ping
         run: |
           python --version
@@ -45,6 +35,27 @@ jobs:
           stat -c '%a %n' /run/wrappers/bin/sudo
           /run/current-system/sw/bin/ping -c5 8.8.8.8
           ping -c5 8.8.8.8
+
+      - name: Testa docker
+        run: |
+          stat -c '%a %n' $(which docker)
+          stat -c '%a %n' $(readlink -f $(which docker))
+          stat -c '%a %n' /run/wrappers/bin/docker
+          stat -c '%a %n' /run/current-system/sw/bin/docker
+          echo 12345
+          /run/wrappers/bin/docker images
+          /run/current-system/sw/bin/docker images
+
+      - name: Testa sudo
+        run: |
+          stat -c '%a %n' $(which sudo)
+          stat -c '%a %n' $(readlink -f $(which sudo))
+          stat -c '%a %n' /run/wrappers/bin/sudo
+          stat -c '%a %n' /run/current-system/sw/bin/sudo
+          echo 12345
+          sudo id
+          /run/wrappers/bin/sudo id
+          /run/current-system/sw/bin/sudo id
 
       - name: Recolhe info show-config
         run: |
