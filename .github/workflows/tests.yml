@@ -34,7 +34,7 @@ jobs:
           python --version
           stat -c '%a %n' $(which ping)
           stat -c '%a %n' $(readlink -f $(which ping))
-          /run/current-system/sw/bin/ping -c5 8.8.8.8
+          # /run/current-system/sw/bin/ping -c5 8.8.8.8 # Funciona tb, mas comentado para poupar um pouco de tempo.
           ping -c5 8.8.8.8
 
       - name: profile install hello test
@@ -49,6 +49,7 @@ jobs:
           nix profile install nixpkgs#nodejs
           echo "${PATH//:/$'\n'}"
           nix profile list
+          /home/nixuser/.nix-profile/bin/node --version
           node --version
 
       - name: Testa sudo

@@ -353,7 +353,7 @@
                 RestrictSUIDSGID = false;
                 # DeviceAllow = [ "/dev/kvm" ];
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
-                # Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
+                Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/home/nixuser/.nix-profile/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };
 
               virtualisation.docker.enable = true;
@@ -382,7 +382,7 @@
                 Error: Process completed with exit code 125.
                 https://github.com/imobanco/github-ci-runner/actions/runs/7410557206/job/20163140291#step:8:56
               */
-              virtualisation.podman.enable = false;
+              virtualisation.podman.enable = true;
 
               systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" "podman" ];
 
@@ -568,7 +568,7 @@
                 direnv
                 fzf
                 jq
-                hello
+                # hello
                 # podman
                 python3
                 neovim
