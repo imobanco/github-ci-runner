@@ -59,6 +59,9 @@ jobs:
         run: |
           cat /etc/subuid
           cat /etc/subgid
+          stat -c '%a %n' /run/wrappers/bin/newuidmap
+          stat -c '%a %n' /run/wrappers/bin/newgidmap
+          podman info
           podman images
 
       - name: Testa sudo
