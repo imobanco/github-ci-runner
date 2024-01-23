@@ -364,6 +364,7 @@
                 # https://man7.org/linux/man-pages/man7/capabilities.7.html
                 # https://medium.com/@maros.kukan/advanced-containers-with-podman-f79302de85b0
                 # https://linuxconfig.org/how-to-increase-the-security-of-systemd-services
+                # https://unix.stackexchange.com/a/639604
                 AmbientCapabilities = [
                   "CAP_CHOWN"
                   "CAP_DAC_OVERRIDE"
@@ -395,7 +396,7 @@
 
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
-                # DeviceAllow = [ "/dev/kvm" ];
+                DeviceAllow = [ "auto" ]; # https://github.com/NixOS/nixpkgs/issues/18708#issuecomment-248254608
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
                 # Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/home/nixuser/.nix-profile"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
                 Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/nix/var/nix/profiles/per-user/nixuser/profile/bin:/home/nixuser/.nix-profile/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
