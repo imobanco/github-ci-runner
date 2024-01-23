@@ -398,7 +398,7 @@
                   "CAP_SYS_CHROOT"
                 ];
 
-                # RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" ]; # TODO: A/B teste!
+                # RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" "AF_XDP" ]; # TODO: A/B teste!
                 RestrictAddressFamilies = [ "" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
