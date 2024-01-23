@@ -78,12 +78,7 @@ jobs:
           # podman images
           docker --version
           docker run --rm alpine cat /etc/os-release
-          docker \
-          run \
-          --privileged=true \
-          --rm \
-          quay.io/podman/stable \
-          alpine cat /etc/os-release
+          podman run --rm alpine cat /etc/os-release
           # podman --log-level debug info
           # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
           # podman network ls

@@ -340,8 +340,6 @@
 
                 # ExecStart = lib.mkForce "echo Hi, %u";
                 ProtectControlGroups = false;
-
-                NoNewPrivileges = false;
                 # PrivateTmp = false;
                 PrivateUsers = false;
                 RestrictNamespaces = false;
@@ -354,6 +352,7 @@
                 # RemoveIPC = false;
                 MemoryDenyWriteExecute = "no"; # TODO: A/B teste!
                 PrivateNetwork = "no";
+                RestrictRealtime = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
                 # ProtectKernelTunables = false;
@@ -400,7 +399,15 @@
 
                 # https://man7.org/linux/man-pages/man7/address_families.7.html
                 # RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" "AF_XDP" ]; # TODO: A/B teste!
-                RestrictAddressFamilies = [ "" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
+                RestrictAddressFamilies = [ "AF_UNIX" "AF_NETLINK" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
+                /*
+                The reason is that using RestrictAddressFamilies in an unprivileged systemd user service implies
+                NoNewPrivileges=yes. This prevents /usr/bin/newuidmap and /usr/bin/newgidmap from running with
+                elevated privileges. Podman executes newuidmap and newgidmap to set up user namespace. Both executables
+                normally run with elevated privileges, as they need to perform operations not available to an
+                unprivileged user.
+                */
+                NoNewPrivileges = true;
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
                 DeviceAllow = [ "auto" ]; # https://github.com/NixOS/nixpkgs/issues/18708#issuecomment-248254608
