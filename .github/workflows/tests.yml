@@ -77,12 +77,10 @@ jobs:
           # podman unshare cat /proc/self/uid_map /proc/self/gid_map
           # podman --log-level debug info
           podman images
-          docker images
-          docker run --rm alpine cat /etc/os-release
           podman network ls
-          podman pull alpine
+          # podman pull alpine
           # podman run --rm alpine cat /etc/os-release
-          podman images
+          # podman images
 
       - name: Testa sudo
         run: |
