@@ -348,10 +348,10 @@
                 PrivateMounts = false;
                 ProtectHome = "no";
                 ProtectSystem = "no"; # TODO: A/B teste!
-                ProtectHostname = false;
+                ProtectHostname = false; # TODO: hardening, precisamos disso? Talvez nix buils precise!
                 # RemoveIPC = false;
                 MemoryDenyWriteExecute = "no"; # TODO: A/B teste!
-                PrivateNetwork = "no";
+                PrivateNetwork = false; # TODO: hardening https://github.com/NixOS/nixpkgs/pull/259056/files#diff-e70037b1f30ecb052931d6b896b8236a67d5ca92dbc8b2057d4f41a8bb70a7a4R308
                 RestrictRealtime = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
@@ -406,6 +406,7 @@
                 elevated privileges. Podman executes newuidmap and newgidmap to set up user namespace. Both executables
                 normally run with elevated privileges, as they need to perform operations not available to an
                 unprivileged user.
+                https://www.redhat.com/sysadmin/podman-systemd-limit-access
                 */
                 NoNewPrivileges = true;
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
