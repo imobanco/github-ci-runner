@@ -76,7 +76,6 @@ jobs:
           stat -c '%a %n' /run/wrappers/bin/newgidmap
           podman images
           docker run --rm alpine cat /etc/os-release
-          cat trace.txt
           # podman --log-level debug info
           # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
           # podman network ls
