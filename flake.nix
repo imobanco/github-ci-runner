@@ -456,7 +456,7 @@
                 ];
 
                 # https://man7.org/linux/man-pages/man7/address_families.7.html
-                RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" "AF_XDP" ]; # TODO: A/B teste! # https://github.com/containers/podman/discussions/14311
+                RestrictAddressFamilies = [ "AF_BRIDGE" "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" "AF_XDP" ]; # TODO: A/B teste! # https://github.com/containers/podman/discussions/14311
                 # RestrictAddressFamilies = [ "AF_UNIX" "AF_NETLINK" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
                 /*
                 The reason is that using RestrictAddressFamilies in an unprivileged systemd user service implies
@@ -518,14 +518,10 @@
                   echo "sudo systemd-analyze security github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "sudo systemctl show github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "sudo systemctl cat github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
-                  echo "journalctl -xeu github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
                   echo "systemctl status github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "save-pat && sudo systemctl restart github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
                   echo "sudo systemctl restart github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
-
-                  echo "${GH_TOKEN}" > /run/secrets/github-runner/nixos.token
-
-                  sudo systemctl restart github-runner-${GH_HOSTNAME}.service
+                  echo "journalctl -xeu github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
 
                   echo "Ended"
                 '';
@@ -540,6 +536,7 @@
                   # TODO: remover hardcoded
                   mkdir -pv -m 0700 /run/secrets/github-runner
                   chown nixuser:nixgroup /run/secrets/github-runner
+                  echo "${GH_TOKEN}" > /run/secrets/github-runner/nixos.token
 
                   echo End
                 '';
