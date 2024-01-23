@@ -365,6 +365,10 @@
                 # https://medium.com/@maros.kukan/advanced-containers-with-podman-f79302de85b0
                 # https://linuxconfig.org/how-to-increase-the-security-of-systemd-services
                 # https://unix.stackexchange.com/a/639604
+                # https://nixos.wiki/wiki/Systemd_Hardening
+                # TODO: https://discourse.nixos.org/t/nginx-worker-processes-exit-with-signal-31-when-running-via-systemd/13471/7
+
+                # TODO: https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L5
                 AmbientCapabilities = [
                   "CAP_CHOWN"
                   "CAP_DAC_OVERRIDE"
@@ -394,7 +398,8 @@
                   "CAP_SYS_CHROOT"
                 ];
 
-                RestrictAddressFamilies = [ ];
+                # RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" ]; # TODO: A/B teste!
+                RestrictAddressFamilies = [ "" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
                 DeviceAllow = [ "auto" ]; # https://github.com/NixOS/nixpkgs/issues/18708#issuecomment-248254608
