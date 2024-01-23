@@ -355,8 +355,11 @@
                 RestrictRealtime = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
-                # ProtectKernelTunables = false;
-                # ProtectProc = "";
+                ProtectKernelTunables = false; # TODO: A/B teste!
+                # ProtectProc = "invisible";
+                ProtectProc = "ptraceable"; # TODO: A/B teste!
+                SocketBindAllow = "any"; # TODO: A/B teste!
+                SystemCallArchitectures = ""; # TODO: A/B teste!
 
                 # https://www.redhat.com/sysadmin/mastering-systemd
                 # https://unix.stackexchange.com/a/581337
@@ -368,38 +371,93 @@
                 # TODO: https://discourse.nixos.org/t/nginx-worker-processes-exit-with-signal-31-when-running-via-systemd/13471/7
 
                 # TODO: https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L5
+                # https://github.com/containers/podman/issues/4618
+                # https://manpages.debian.org/bullseye/manpages/capabilities.7.en.html#CAP_SYS_ADMIN
+                # https://docs.arbitrary.ch/security/systemd.html
+                # https://github.com/restic/rest-server/issues/148
+                # https://discussion.fedoraproject.org/t/f40-change-proposal-systemd-security-hardening-system-wide/96423
                 AmbientCapabilities = [
+                  "CAP_AUDIT_CONTROL"
+                  "CAP_AUDIT_WRITE"
+                  "CAP_BLOCK_SUSPEN"
                   "CAP_CHOWN"
                   "CAP_DAC_OVERRIDE"
+                  "CAP_DAC_READ_SEARCH"
+                  "CAP_FOWNER"
+                  "CAP_FSETID"
                   "CAP_IPC_LOCK"
+                  "CAP_IPC_OWNER"
                   "CAP_KILL"
+                  "CAP_LEASE"
+                  "CAP_LINUX_IMMUTABLE"
+                  "CAP_MAC_ADMIN"
+                  "CAP_MAC_OVERRIDE"
+                  "CAP_MKNOD"
                   "CAP_NET_ADMIN"
                   "CAP_NET_BIND_SERVICE"
                   "CAP_NET_BROADCAST"
                   "CAP_NET_RAW"
+                  "CAP_SETFCAP"
                   "CAP_SETGID"
+                  "CAP_SETPCAP"
                   "CAP_SETUID"
+                  "CAP_SYSLOG"
                   "CAP_SYS_ADMIN"
+                  "CAP_SYS_BOOT"
                   "CAP_SYS_CHROOT"
+                  "CAP_SYS_MODULE"
+                  "CAP_SYS_NICE"
+                  "CAP_SYS_PACCT"
+                  "CAP_SYS_PTRACE"
+                  "CAP_SYS_RAWIO"
+                  "CAP_SYS_RESOURCE"
+                  "CAP_SYS_TIME"
+                  "CAP_SYS_TTY_CONFIG"
+                  "CAP_WAKE_ALARM"
                 ];
                 CapabilityBoundingSet = [
+                  "CAP_AUDIT_CONTROL"
+                  "CAP_AUDIT_WRITE"
+                  "CAP_BLOCK_SUSPEN"
                   "CAP_CHOWN"
                   "CAP_DAC_OVERRIDE"
+                  "CAP_DAC_READ_SEARCH"
+                  "CAP_FOWNER"
+                  "CAP_FSETID"
                   "CAP_IPC_LOCK"
+                  "CAP_IPC_OWNER"
                   "CAP_KILL"
+                  "CAP_LEASE"
+                  "CAP_LINUX_IMMUTABLE"
+                  "CAP_MAC_ADMIN"
+                  "CAP_MAC_OVERRIDE"
+                  "CAP_MKNOD"
                   "CAP_NET_ADMIN"
                   "CAP_NET_BIND_SERVICE"
                   "CAP_NET_BROADCAST"
                   "CAP_NET_RAW"
+                  "CAP_SETFCAP"
                   "CAP_SETGID"
+                  "CAP_SETPCAP"
                   "CAP_SETUID"
+                  "CAP_SYSLOG"
                   "CAP_SYS_ADMIN"
+                  "CAP_SYS_BOOT"
                   "CAP_SYS_CHROOT"
+                  "CAP_SYS_MODULE"
+                  "CAP_SYS_NICE"
+                  "CAP_SYS_PACCT"
+                  "CAP_SYS_PTRACE"
+                  "CAP_SYS_RAWIO"
+                  "CAP_SYS_RESOURCE"
+                  "CAP_SYS_TIME"
+                  "CAP_SYS_TTY_CONFIG"
+                  "CAP_WAKE_ALARM"
                 ];
 
                 # https://man7.org/linux/man-pages/man7/address_families.7.html
-                # RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" "AF_XDP" ]; # TODO: A/B teste!
-                RestrictAddressFamilies = [ "AF_UNIX" "AF_NETLINK" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
+                RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_NETLINK" "AF_INET6" "AF_XDP" ]; # TODO: A/B teste! # https://github.com/containers/podman/discussions/14311
+                # RestrictAddressFamilies = [ "AF_UNIX" "AF_NETLINK" ]; # TODO: A/B teste! https://github.com/serokell/serokell.nix/blob/bfd859fcb96aa912f4ca05b4afe4082114ca9ec7/lib/systemd/profiles.nix#L34
                 /*
                 The reason is that using RestrictAddressFamilies in an unprivileged systemd user service implies
                 NoNewPrivileges=yes. This prevents /usr/bin/newuidmap and /usr/bin/newgidmap from running with
@@ -408,7 +466,7 @@
                 unprivileged user.
                 https://www.redhat.com/sysadmin/podman-systemd-limit-access
                 */
-                NoNewPrivileges = true;
+                NoNewPrivileges = false; # https://docs.arbitrary.ch/security/systemd.html#nonewprivileges
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
                 DeviceAllow = [ "auto" ]; # https://github.com/NixOS/nixpkgs/issues/18708#issuecomment-248254608
@@ -457,7 +515,8 @@
                   DESTINATION=/home/nixuser/.zsh_history
 
                   # TODO: https://stackoverflow.com/a/67169387
-                  echo "sudo systemctl show github-runner-${GH_HOSTNAME}.servic | cat" >> "$DESTINATION"
+                  echo "sudo systemd-analyze security github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
+                  echo "sudo systemctl show github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "sudo systemctl cat github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "journalctl -xeu github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
                   echo "systemctl status github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
