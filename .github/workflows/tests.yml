@@ -74,7 +74,8 @@ jobs:
           ls -l /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newgidmap
-          podman images
+          podman network ls
+          # podman images
           docker --version
           docker run --rm alpine cat /etc/os-release
           # podman --log-level debug info

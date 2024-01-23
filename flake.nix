@@ -449,6 +449,7 @@
                   DESTINATION=/home/nixuser/.zsh_history
 
                   # TODO: https://stackoverflow.com/a/67169387
+                  echo "sudo systemctl show github-runner-${GH_HOSTNAME}.servic | cat" >> "$DESTINATION"
                   echo "sudo systemctl cat github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
                   echo "journalctl -xeu github-runner-${GH_HOSTNAME}.service" >> "$DESTINATION"
                   echo "systemctl status github-runner-${GH_HOSTNAME}.service | cat" >> "$DESTINATION"
