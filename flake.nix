@@ -314,7 +314,7 @@
               services.github-runner.ephemeral = true;
               services.github-runner.extraLabels = [ "nixos" ];
               # services.github-runner.extraPackages = config.environment.systemPackages;
-              services.github-runner.extraPackages = with pkgs; [ iputils which python39 sudo ];
+              services.github-runner.extraPackages = with pkgs; [ iputils which podman python39 sudo ];
               services.github-runner.name = "${GH_HOSTNAME}";
               services.github-runner.replace = true;
               # services.github-runner.runnerGroup = "nixgroup"; # Apenas administradores da organização do github conseguem usar isso?
