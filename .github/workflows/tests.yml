@@ -74,9 +74,9 @@ jobs:
           ls -l /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newuidmap
           stat -c '%a %n' /run/wrappers/bin/newgidmap
-          podman --log-level debug info
-          podman unshare cat /proc/self/uid_map /proc/self/gid_map
-          # podman images
+          podman images
+          # podman --log-level debug info
+          # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
           # podman network ls
           # podman pull alpine
           # podman run --rm alpine cat /etc/os-release
