@@ -394,6 +394,7 @@
                   "CAP_SYS_CHROOT"
                 ];
 
+                RestrictAddressFamilies = [ ];
                 SystemCallFilter = lib.mkForce [ ]; # Resolve ping -c 3 8.8.8.8 -> Bad system call (core dumped)
                 RestrictSUIDSGID = false;
                 DeviceAllow = [ "auto" ]; # https://github.com/NixOS/nixpkgs/issues/18708#issuecomment-248254608
