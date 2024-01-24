@@ -520,6 +520,7 @@
                 https://github.com/imobanco/github-ci-runner/actions/runs/7410557206/job/20163140291#step:8:56
               */
               virtualisation.podman.enable = true;
+              # boot.kernel.sysctl."kernel.unprivileged_userns_clone" = 1;
 
               # Funciona, mas não resolveu o erro newuidmap: write to uid_map failed: Operation not permitted
               environment.etc.services.mode = ""; # https://github.com/containers/podman/issues/21033#issuecomment-1858199501
