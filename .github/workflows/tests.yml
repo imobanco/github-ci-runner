@@ -77,7 +77,7 @@ jobs:
           stat -c '%a %n' /run/wrappers/bin/newgidmap
           getcap /run/wrappers/bin/newuidmap
           getcap /run/wrappers/bin/newgidmap          
-          podman network ls
+          sudo podman network ls
           # podman images
           docker --version
           docker run --rm alpine cat /etc/os-release

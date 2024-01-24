@@ -211,6 +211,26 @@
                   virtualisation.writableStore = true; # TODO: hardening
 
                   virtualisation.docker.enable = true;
+                  virtualisation.podman = {
+                    enable = true;
+                    dockerCompat = false;
+                    dockerSocket.enable = false;
+                  };
+                  # virtualisation.oci-containers.backend = "podman";
+
+                  #  users = {
+                  #    groups.podman = { gid = 31000; };
+                  #    users.podman = {
+                  #      isSystemUser = true;
+                  #      uid = 31000;
+                  #      linger = true;
+                  #      group = "podman";
+                  #      home = "/home/podman";
+                  #      createHome = true;
+                  #      subUidRanges = [{ count = 65536; startUid = 615536; }];
+                  #      subGidRanges = [{ count = 65536; startGid = 615536; }];
+                  #    };
+                  #  };
 
                   programs.dconf.enable = true;
                   # security.polkit.enable = true; # TODO: hardening?
@@ -343,7 +363,7 @@
                 # PrivateTmp = false;
                 PrivateUsers = false;
                 RestrictNamespaces = false;
-                DynamicUser = false;
+                DynamicUser = false; # TODO: A/B teste!
                 PrivateDevices = false;
                 PrivateMounts = false;
                 ProtectHome = "no";
@@ -475,8 +495,6 @@
                 Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/nix/var/nix/profiles/per-user/nixuser/profile/bin:/home/nixuser/.nix-profile/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };
 
-              virtualisation.docker.enable = true;
-
               /*
                 TODO: apenas na unidade do systemd,
                   na VM (no "terminal") o podman funciona!
@@ -505,7 +523,7 @@
 
               # Funciona, mas não resolveu o erro newuidmap: write to uid_map failed: Operation not permitted
               environment.etc.services.mode = ""; # https://github.com/containers/podman/issues/21033#issuecomment-1858199501
-              # TODO
+
               systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" "podman" ];
 
               systemd.user.services.populate-history-vagrant = {
