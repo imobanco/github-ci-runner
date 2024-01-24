@@ -80,7 +80,6 @@ jobs:
           # podman images
           docker --version
           docker run --rm alpine cat /etc/os-release
-          mount --make-rshared /proc
           podman run --rm alpine cat /etc/os-release
           # podman network ls
           # podman --log-level debug info
