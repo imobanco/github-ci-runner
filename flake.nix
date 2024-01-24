@@ -505,7 +505,7 @@
 
               # Funciona, mas não resolveu o erro newuidmap: write to uid_map failed: Operation not permitted
               environment.etc.services.mode = ""; # https://github.com/containers/podman/issues/21033#issuecomment-1858199501
-
+              # TODO
               systemd.services.github-runner.serviceConfig.SupplementaryGroups = [ "docker" "podman" ];
 
               systemd.user.services.populate-history-vagrant = {

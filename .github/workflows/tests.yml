@@ -24,6 +24,7 @@ jobs:
           pwd
           ls -la /nix/store | grep hello
           echo "${PATH//:/$'\n'}"
+          env | sort
 
       - name: Recolhe info show-config
         run: |
