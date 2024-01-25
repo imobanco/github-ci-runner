@@ -67,7 +67,12 @@ jobs:
       - name: Testa /proc
         run: |
           mount | grep /proc
+          echo 
           findmnt -R /proc
+          echo 
+          unshare -Ur -m bash -c 'id && pwd && ls -alh'
+          unshare -Ur -m bash -c 'cat /proc/$$/mounts'
+          cat /proc/$$/mountinfo
 
       - name: Testa podman
         run: |
