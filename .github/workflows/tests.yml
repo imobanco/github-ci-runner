@@ -67,6 +67,7 @@ jobs:
       - name: Testa /proc
         run: |
           touch /proc
+          mount | grep /proc
           findmnt -R /proc
 
       - name: Testa podman
