@@ -76,7 +76,7 @@ jobs:
 
       - name: Testa podman in docker
         run: |
-          docker run -it --rm quay.io/podman/stable podman run --rm alpine cat /etc/os-release
+          docker run --rm quay.io/podman/stable podman run --rm alpine cat /etc/os-release
 
       - name: Testa podman
         run: |
