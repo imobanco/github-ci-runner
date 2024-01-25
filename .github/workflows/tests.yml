@@ -74,10 +74,6 @@ jobs:
           unshare -Ur -m bash -c 'cat /proc/$$/mounts'
           cat /proc/$$/mountinfo
 
-      - name: Testa podman in docker
-        run: |
-          docker run --rm quay.io/podman/stable podman run --rm alpine cat /etc/os-release
-
       - name: Testa podman
         run: |
           cat /proc/sys/user/max_user_namespaces

@@ -376,7 +376,8 @@
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
                 ProtectKernelTunables = false; # TODO: A/B teste!
-                ProtectProc = "invisible"; # TODO: A/B teste!
+                ProtectProc = "default"; # https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#ProtectProc=
+                # ProtectProc = "invisible"; # TODO: A/B teste!
                 # ProtectProc = "ptraceable"; # TODO: A/B teste!
                 SocketBindAllow = "any"; # TODO: A/B teste!
                 SystemCallArchitectures = ""; # TODO: A/B teste!
