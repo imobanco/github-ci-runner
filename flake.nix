@@ -376,8 +376,8 @@
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
                 ProtectKernelTunables = false; # TODO: A/B teste!
-                # ProtectProc = "invisible";
-                ProtectProc = "ptraceable"; # TODO: A/B teste!
+                ProtectProc = "invisible"; # TODO: A/B teste!
+                # ProtectProc = "ptraceable"; # TODO: A/B teste!
                 SocketBindAllow = "any"; # TODO: A/B teste!
                 SystemCallArchitectures = ""; # TODO: A/B teste!
 
