@@ -358,6 +358,16 @@
                   # "/nix/var/nix/profiles/per-user/" # https://github.com/cachix/cachix-ci-agents/blob/63f3f600d13cd7688e1b5db8ce038b686a5d29da/agents/linux.nix#L30C26-L30C59
                 ];
 
+                # BindPaths = [ "/proc:/proc:rbind" ]; # TODO: A/B teste!
+                BindPaths = [
+                  "/proc"
+                ];
+
+                IPAddressAllow = [ "0.0.0.0/0" "::/0" ]; # https://github.com/skogsbrus/os/blob/cced4b4dfc60d03168a2bf0ad5e4ca901c732136/sys/caddy.nix#L161
+                IPAddressDeny = [ ];
+                #              Environment = [
+                #                "HOME=/var/lib/caddy"
+                #              ];
                 # ExecStart = lib.mkForce "echo Hi, %u";
                 ProtectControlGroups = false;
                 # PrivateTmp = false;
@@ -371,7 +381,7 @@
                 ProtectHostname = false; # TODO: hardening, precisamos disso? Talvez nix buils precise!
                 # RemoveIPC = false;
                 MemoryDenyWriteExecute = "no"; # TODO: A/B teste!
-                PrivateNetwork = false; # TODO: hardening https://github.com/NixOS/nixpkgs/pull/259056/files#diff-e70037b1f30ecb052931d6b896b8236a67d5ca92dbc8b2057d4f41a8bb70a7a4R308
+                PrivateNetwork = false; # https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#PrivateNetwork= TODO: hardening https://github.com/NixOS/nixpkgs/pull/259056/files#diff-e70037b1f30ecb052931d6b896b8236a67d5ca92dbc8b2057d4f41a8bb70a7a4R308
                 RestrictRealtime = false;
                 # ProtectKernelLogs = false;
                 # ProtectKernelModules = false;
