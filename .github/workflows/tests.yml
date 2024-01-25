@@ -88,11 +88,11 @@ jobs:
           getcap /run/wrappers/bin/newuidmap
           getcap /run/wrappers/bin/newgidmap
           # podman images
-          docker --version
-          docker run --rm alpine cat /etc/os-release
+          # docker --version
+          # docker run --rm alpine cat /etc/os-release
           # podman --log-level debug pull alpine
           # podman images
-          # podman run --log-level debug --rm alpine cat /etc/os-release
+          podman run --log-level debug --rm alpine cat /etc/os-release
           # podman network ls
           # podman --log-level debug info
           # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
