@@ -93,7 +93,7 @@ jobs:
           # docker run --rm alpine cat /etc/os-release
           # podman --log-level debug pull alpine
           # podman images
-          podman run --privileged --rm -v /proc:/proc:rw alpine sh -c 'apk add python3 && python --version'
+          podman run --privileged --rm -v /proc:/proc:rw -v /dev:/dev:rw alpine sh -c 'apk add python3 && python --version'
           # podman network ls
           # podman --log-level debug info
           # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
