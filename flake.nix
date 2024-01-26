@@ -25,6 +25,86 @@
 
         foo-bar = prev.hello;
 
+        cachedOCIImage1 = prev.dockerTools.pullImage {
+          finalImageTag = "latest";
+          imageDigest = "sha256:075975296016084fc66b59c35c9d4504765d95aadcd5469f28d2b75750348fc5";
+          imageName = "quay.io/podman/hello";
+          name = "quay.io/podman";
+          sha256 = "sha256-GBZWj/pp5wzfTrAwaMnZ9xjZ1imqkRmoPAxosXrEiZM=";
+        };
+
+        cachedOCIImage2 = prev.dockerTools.pullImage {
+          finalImageTag = "1.28";
+          imageDigest = "sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47";
+          imageName = "busybox";
+          name = "docker.io/busybox";
+          sha256 = "sha256-qWfC8wZBUhwHEPkf6ns4ST7KUyE9RlKaatzr+DCz+3E=";
+        };
+
+        cachedOCIImage3 = prev.dockerTools.pullImage {
+          # skopeo inspect docker://ghcr.io/actions/actions-runner:2.311.0 | jq -r '.Digest'
+          finalImageTag = "2.311.0";
+          imageDigest = "sha256:e505724e0dbb070454912b159645932f74dda9aed03c48c463f33e270a6cbfa1";
+          imageName = "ghcr.io/actions/actions-runner";
+          name = "ghcr.io/actions";
+          sha256 = "sha256-pHkSrrUaqZhgm/+UviuiKEJrjDXue5ww85qOrG6ZFzY=";
+        };
+
+        cachedOCIImage4 = prev.dockerTools.pullImage {
+          # skopeo inspect docker://docker.io/docker:24.0.7-dind-alpine3.18 | jq -r '.Digest'
+          finalImageTag = "24.0.7-dind-alpine3.18";
+          imageDigest = "sha256:c90e58d30700470fc59bdaaf802340fd25c1db628756d7bf74e100c566ba9589";
+          imageName = "docker.io/docker";
+          name = "docker.io/docker";
+          sha256 = "sha256-RRXGM3xWuB67hCfZCa623utFWYMpkqYW6UB/G8GQsOw=";
+        };
+
+        cachedOCIImage5 = prev.dockerTools.streamLayeredImage {
+          name = "chromium";
+          tag = "${prev.chromium.version}";
+          config = {
+            Cmd = [
+              "${prev.chromium}/bin/chromium"
+              "--headless"
+              "--no-default-browser-check"
+              "--no-first-run"
+              "--disable-extensions"
+              "--disable-background-networking"
+              "--disable-background-timer-throttling"
+              "--disable-backgrounding-occluded-windows"
+              "--disable-renderer-backgrounding"
+              "--disable-breakpad"
+              "--disable-client-side-phishing-detection"
+              "--disable-crash-reporter"
+              "--disable-default-apps"
+              "--disable-dev-shm-usage"
+              "--disable-device-discovery-notifications"
+              "--disable-namespace-sandbox"
+              "--user-data-dir=/tmp/chrome-data-dir"
+              "--disable-translate"
+              "--autoplay-policy=no-user-gesture-required"
+              "--window-size=1366x768"
+              "--remote-debugging-address=127.0.0.1"
+              "--remote-debugging-port=0"
+              "--no-sandbox"
+              "--disable-gpu"
+            ];
+            Env = [
+              "FONTCONFIG_FILE=${prev.fontconfig.out}/etc/fonts/fonts.conf"
+              "FONTCONFIG_PATH=${prev.fontconfig.out}/etc/fonts/"
+            ];
+          };
+        };
+        #cachedOCIImage5 = prev.dockerTools.pullImage {
+        #  # skopeo inspect docker://docker.io/docker:24.0.7-dind-alpine3.18 | jq -r '.Digest'
+        #  finalImageTag = "2024-01-08";
+        #  imageDigest = "sha256:113439c25115736fbc26ad0c740349816079003587d1bc63d7eaf48a0b3a55c3";
+        #  imageName = "quay.io/jupyter/scipy-notebook";
+        #  name = "quay.io/jupyter";
+        #  sha256 = "sha256-wYc4v8jBrViU9qBZt1J2P812b8gqi8qQpA3Bo8YwwKM=";
+        #  # diskSize = 2 * 1024;
+        #  # buildVMMemorySize = 2 * 512;
+        #};
       };
     } //
     (
@@ -81,6 +161,12 @@
               https://unix.stackexchange.com/a/698488
             */
             text = ''
+
+              # https://unix.stackexchange.com/a/230442
+              # export NO_AT_BRIDGE=1
+              # https://gist.github.com/eoli3n/93111f23dbb1233f2f00f460663f99e2#file-rootless-podman-wayland-sh-L25
+              export LD_LIBRARY_PATH="${pkgsAllowUnfree.libcanberra-gtk3}"/lib/gtk-3.0/modules
+
               ${self.nixosConfigurations.vm.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
 
               export VNC_PORT=3001
@@ -123,6 +209,7 @@
               jq
               patchelf
               sops
+              skopeo
               ssh-to-age
             ];
 
@@ -467,6 +554,7 @@
                 neovim
                 nix-direnv
                 nixos-option
+                skopeo
                 oh-my-zsh
                 xclip
                 zsh
@@ -537,20 +625,16 @@
 
               environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
 
-              # services.kubernetes.kubelet.seedDockerImages = [
-              #   (pkgs.dockerTools.pullImage {
-              #     name = "ghcr.io/actions";
-              #     imageName = "actions-runner:2.311.0";
-              #     # tag = "2.311.0";
-              #     sha256 = "sha256-BVnOXiYRUg3ukjYJBYbazOfrIrzQt7aRB2LWPf1b+ZE=";
-              #     # podman inspect docker.io/sickcodes/docker-osx:latest | jq ".[].Digest"
-              #     # imageDigest = "sha256:e505724e0dbb070454912b159645932f74dda9aed03c48c463f33e270a6cbfa1";
-              #     imageDigest = "";
-              #   })
-              # ];
-              # docker pull ghcr.io/actions/actions-runner:2.311.0
-              # docker inspect docker.io/sickcodes/docker-osx:latest | jq ".[].Digest"
-              # dockerTools.examples.redis
+              # nix eval --impure --json \
+              # '.#nixosConfigurations.vm.config.services.kubernetes.kubelet.seedDockerImages'
+              # services.kubernetes.kubelet.seedDockerImages = (with pkgs; [
+              #   cachedOCIImage1
+              #   cachedOCIImage2
+              #   cachedOCIImage3
+              #   cachedOCIImage4
+              #   cachedOCIImage5
+              # ]);
+
               services.kubernetes.roles = [ "master" "node" ];
               services.kubernetes.masterAddress = "nixos";
               services.kubernetes = {
