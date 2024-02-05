@@ -1,0 +1,118 @@
+name: heavy tests
+
+
+on: workflow_dispatch
+
+
+jobs:
+  test:
+    runs-on:
+      group: nixgroup
+      labels: nixos
+    name: Testes
+    steps:
+      - name: checkout PR merge commit
+        uses: actions/checkout@v4
+        with:
+          # Nix Flakes doesn't work on shallow clones
+          fetch-depth: 0
+
+      - name: Testes de esforço
+        run: |
+          docker \
+            run \
+            -t \
+            --rm \
+            polinux/stress-ng \
+              --cpu 4 \
+              --io 4 \
+              --vm 2 \
+              --vm-bytes 128M \
+              --fork 4 \
+              --timeout 10s
+
+      - name: Executa GNU hello e python3
+        run: |
+          hello
+          python --version
+
+      - name: Metadatas
+        run: |
+          cat /etc/os*release
+          echo           
+          # cat /etc/group
+          uname -a
+          echo 
+          id 
+          echo 
+          pwd 
+          echo 
+          ls -alh 
+          echo 
+          nproc 
+          echo 
+          free -h 
+          echo 
+          # sudo id 
+          # A ideia aqui é testar persistência de estado
+          cat $HOME/logs.txt || true
+          echo FOO-BAR > $HOME/logs.txt
+
+      - name: Testes sobre docker
+        run: |
+          # env | sort
+          # touch /dev/kvm
+          which docker
+          readlink -f $(which docker)
+          docker --version
+          docker info
+          docker images
+          docker run --rm alpine cat /etc/os-release
+          docker images
+          docker build --tag custom-python .
+          docker images
+
+      - name: Testes sobre /dev/kvm
+        run: |
+          id
+          docker run --privileged=true --rm \
+          alpine sh -c 'id && touch /dev/kvm && stat /dev/kvm'
+
+      - name: Testes sobre DinD
+        run: |
+          docker rm --force dind-container || true
+          docker \
+          run \
+          --device=/dev/kvm \
+          -d \
+          -t \
+          --name=dind-container --rm \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          docker:24.0.7-dind-alpine3.18 \
+          tail -f /dev/null
+          echo 
+          docker \
+          exec \
+          -t \
+          dind-container \
+          /bin/sh \
+          -c \
+          'docker run -t --rm alpine cat /etc/os-release'
+
+      - name: Testes sobre PinD
+        run: |
+          docker \
+          run \
+          --privileged=true \
+          --rm \
+          quay.io/podman/stable \
+          podman run quay.io/podman/hello
+
+      - name: Mais metadados
+        run: |
+           nix flake --version
+           nix flake metadata nixpkgs
+           echo
+           nix build --no-link --print-out-paths nixpkgs#dockerTools.examples.redis
+           echo
+           nix build --no-link --print-out-paths --rebuild nixpkgs#dockerTools.examples.redis

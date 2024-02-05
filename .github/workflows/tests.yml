@@ -1,37 +1,113 @@
 name: tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branchs:
-      - 'feature/**'
-      - 'fix/**'
-      - 'refactor/**'
+
+on: workflow_dispatch
+
 
 
 jobs:
   test:
-    runs-on: self-hosted
-    name: Testes
+    runs-on:
+      # group: nixgroup
+      labels: nixos
+    name: NixOS Testes
     steps:
       - name: checkout PR merge commit
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          # Nix Flakes doesn't work on shallow clones
+          fetch-depth: 0
 
-      - name: Rodar um echo
-        run: echo 'teste'
-
-      - name: Executa docker do host
+      - name: Recolhe info
         run: |
-          # sudo apt-get install -y podman
-          docker pull alpine
-          docker images
-          docker info
+          id
+          pwd
+          ls -la /nix/store | grep hello
+          echo "${PATH//:/$'\n'}"
+          env | sort
 
-      - name: Run alpine OCI image with docker and metadatas
+      - name: Recolhe info show-config
         run: |
-          docker run alpine cat /etc/os*release
-          cat /etc/os*release
-          uname -a
-          nix flake metadata nixpkgs
+          nix show-config
+
+      - name: Testa ping
+        run: |
+          python --version
+          stat -c '%a %n' $(which ping)
+          stat -c '%a %n' $(readlink -f $(which ping))
+          # /run/current-system/sw/bin/ping -c3 8.8.8.8 # Funciona tb, mas comentado para poupar um pouco de tempo.
+          ping -c3 8.8.8.8
+
+      - name: profile install hello test
+        run: |
+          nix profile install nixpkgs#hello
+          echo "${PATH//:/$'\n'}"
+          nix profile list
+          # ls -alh "$HOME"/.nix-profile
+          # ls -alh "$HOME"/.nix-profile/
+          ls -alh /nix/var/nix/profiles/per-user/nixuser/profile
+          ls -alh /nix/var/nix/profiles/per-user/nixuser/profile/bin
+          hello
+
+      - name: profile install node test
+        run: |
+          nix profile install nixpkgs#nodejs
+          echo "${PATH//:/$'\n'}"
+          nix profile list
+          node --version
+
+      - name: Testa hostname
+        run: |
+          hostname
+          hostname a1b2c3
+          hostname
+          hostname nixos
+          hostname
+
+      - name: Testa /proc
+        run: |
+          mount | grep /proc
+          echo 
+          findmnt -R /proc
+          echo 
+          unshare -Ur -m bash -c 'id && pwd && ls -alh'
+          unshare -Ur -m bash -c 'cat /proc/$$/mounts'
+          cat /proc/$$/mountinfo
+          # unshare -pfr --mount-proc=/proc echo hi
+
+      - name: Testa podman
+        run: |
+          cat /proc/sys/user/max_user_namespaces
+          cat /proc/self/uid_map
+          grep /run /proc/self/mountinfo
+          cat /etc/subuid
+          cat /etc/subgid
+          ls -l /run/wrappers/bin/newuidmap
+          ls -l /run/wrappers/bin/newuidmap
+          stat -c '%a %n' /run/wrappers/bin/newuidmap
+          stat -c '%a %n' /run/wrappers/bin/newgidmap
+          getcap /run/wrappers/bin/newuidmap
+          getcap /run/wrappers/bin/newgidmap
+          # podman images
+          # docker --version
+          # docker run --rm alpine cat /etc/os-release
+          # podman --log-level debug pull alpine
+          # podman images
+          podman run --privileged --rm -v /proc:/proc:rw -v /dev:/dev:rw alpine sh -c 'apk add python3 && python --version'
+          podman network ls
+          podman info
+          # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
+          # podman network ls
+          # podman pull alpine
+          # podman images
+
+      - name: Testa sudo
+        run: |
+          stat -c '%a %n' $(which sudo)
+          stat -c '%a %n' $(readlink -f $(which sudo))
+          stat -c '%a %n' /run/wrappers/bin/sudo
+          stat -c '%a %n' /run/current-system/sw/bin/sudo
+          echo 12345
+          # sudo id
+          /run/wrappers/bin/sudo id
+          # /run/current-system/sw/bin/sudo id
