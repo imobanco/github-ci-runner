@@ -94,8 +94,8 @@ jobs:
           # podman --log-level debug pull alpine
           # podman images
           podman run --privileged --rm -v /proc:/proc:rw -v /dev:/dev:rw alpine sh -c 'apk add python3 && python --version'
-          # podman network ls
-          # podman --log-level debug info
+          podman network ls
+          podman info
           # podman unshare cat /proc/self/uid_map /proc/self/gid_map          
           # podman network ls
           # podman pull alpine
@@ -108,6 +108,6 @@ jobs:
           stat -c '%a %n' /run/wrappers/bin/sudo
           stat -c '%a %n' /run/current-system/sw/bin/sudo
           echo 12345
-          sudo id
-          # /run/wrappers/bin/sudo id
+          # sudo id
+          /run/wrappers/bin/sudo id
           # /run/current-system/sw/bin/sudo id

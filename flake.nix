@@ -295,6 +295,7 @@
                   direnv
                   file
                   firefox
+                  foo-bar
                   gh
                   git
                   gnumake
@@ -302,9 +303,8 @@
                   openssh
                   openssl
                   starship
+                  sudo
                   which
-                  foo-bar
-
                 ];
 
                 shell = pkgs.zsh;
@@ -341,6 +341,7 @@
               services.github-runner.tokenFile = "/run/secrets/github-runner/nixos.token";
               services.github-runner.url = "https://github.com/Imobanco/github-ci-runner";
               services.github-runner.user = "nixuser";
+              systemd.services.github-runner.path = [ "/run/wrappers" "/run/current-system/sw/bin" ]; # https://discourse.nixos.org/t/podman-rootless-with-systemd/23536/6
               # systemd.user.extraConfig = ''
               #   DefaultEnvironment="PATH=/run/wrappers/bin:/run/current-system/sw/bin:/home/nixuser/.nix-profile/bin"
               # '';
@@ -503,7 +504,7 @@
                 DeviceAllow = [ "auto" ]; # https://github.com/NixOS/nixpkgs/issues/18708#issuecomment-248254608
                 # Environment = "PATH=/run/current-system/sw/bin:${lib.makeBinPath [ pkgs.iputils ]}"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
                 # Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/home/nixuser/.nix-profile"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
-                Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin:/nix/var/nix/profiles/per-user/nixuser/profile/bin:/home/nixuser/.nix-profile/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
+                Environment = "PATH=/run/wrappers/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/per-user/nixuser/profile/bin:/home/nixuser/.nix-profile/bin"; # https://discourse.nixos.org/t/how-to-add-path-into-systemd-user-home-manager-service/31623/4
               };
 
               /*
@@ -714,25 +715,21 @@
 
               environment.systemPackages = with pkgs; [
                 bashInteractive
-                openssh
-
                 direnv
+                firefox
                 fzf
                 jq
-                # hello
-                # podman
-                python3
                 neovim
                 nix-direnv
                 nixos-option
                 oh-my-zsh
-                shadow
+                openssh
+                python3
+                which
                 xclip
                 zsh
                 zsh-autosuggestions
                 zsh-completions
-                firefox
-                which
 
                 (
                   writeScriptBin "save-pat" ''
